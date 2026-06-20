@@ -33,7 +33,7 @@ class WorkoutInputScreen extends ConsumerWidget {
                     notifier: notifier,
                   );
                 }),
-                const SizedBox(height: 4),
+                const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: notifier.addExerciseCard,
                   icon: const Icon(Icons.add),
@@ -51,7 +51,8 @@ class WorkoutInputScreen extends ConsumerWidget {
                   maxLength: 200,
                   maxLines: 3,
                   decoration: const InputDecoration(
-                    hintText: '今日のトレーニングについてメモ（任意）',
+                    hintText: '例）肘を腰に差す感じでやると良い',
+                    hintStyle: TextStyle(color: Colors.grey),
                     border: OutlineInputBorder(),
                   ),
                   onChanged: notifier.setMemo,
@@ -137,6 +138,7 @@ class _ExerciseCard extends ConsumerWidget {
                     isExpanded: true,
                     decoration: const InputDecoration(
                       hintText: '種目を選択',
+                      hintStyle: TextStyle(color: Colors.grey),
                       isDense: true,
                       border: OutlineInputBorder(),
                     ),
@@ -206,10 +208,14 @@ class _ExerciseCard extends ConsumerWidget {
                 notifier: notifier,
               );
             }),
-            TextButton.icon(
-              onPressed: () => notifier.addSet(cardIndex),
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('セット追加'),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => notifier.addSet(cardIndex),
+                icon: const Icon(Icons.add),
+                label: const Text('セット追加'),
+              ),
             ),
           ],
         ),
