@@ -7,6 +7,10 @@ import '../shared/confirm_dialog.dart';
 import '../workout_list/workout_list_notifier.dart';
 import 'workout_detail_provider.dart';
 
+// 💡 レイアウト共通の定数
+const double _setNumberWidth = 32.0; // セット番号の幅
+const double _badgeSpacing = 6.0; // バッジ間の隙間
+
 class WorkoutDetailScreen extends ConsumerWidget {
   const WorkoutDetailScreen({super.key, required this.sessionId});
 
@@ -122,7 +126,41 @@ class _ExerciseSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text(
             group.exerciseName,
-            style: Theme.of(context).textTheme.titleSmall,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            children: [
+              SizedBox(width: _setNumberWidth),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'kg',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+              ),
+              SizedBox(width: _badgeSpacing),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'REP',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+              ),
+              SizedBox(width: _badgeSpacing),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    'RIR',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         ...group.sets.asMap().entries.map((entry) {
@@ -151,7 +189,7 @@ class _SetRow extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(
-            width: 32,
+            width: _setNumberWidth,
             child: Text(
               'S${index + 1}',
               style: Theme.of(
@@ -159,11 +197,11 @@ class _SetRow extends StatelessWidget {
               ).textTheme.bodySmall?.copyWith(color: Colors.grey),
             ),
           ),
-          _Badge('$weight kg'),
-          const SizedBox(width: 6),
-          _Badge('${set.reps} REP'),
-          const SizedBox(width: 6),
-          _Badge('RIR ${set.rir}'),
+          Expanded(child: _Badge(weight)),
+          const SizedBox(width: _badgeSpacing),
+          Expanded(child: _Badge(set.reps.toString())),
+          const SizedBox(width: _badgeSpacing),
+          Expanded(child: _Badge(set.rir.toString())),
         ],
       ),
     );
@@ -178,12 +216,17 @@ class _Badge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(6),
       ),
-      child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.bodyMedium,
+        textAlign: TextAlign.center,
+      ),
     );
   }
 }
