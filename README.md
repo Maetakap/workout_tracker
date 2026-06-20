@@ -1,17 +1,25 @@
-# workout_tracker
+# 筋トレ記録アプリ
 
-A new Flutter project.
+トレーニングセッションを記録・管理するAndroidアプリです。
 
-## Getting Started
+## 機能
 
-This project is a starting point for a Flutter application.
+- セッション記録（種目・セット・重量・REP・RIR・没頭度・メモ）
+- セッション一覧（月・種目フィルター）
+- セッション詳細・編集・削除
+- 種目マスター管理
 
-A few resources to get you started if this is your first Flutter project:
+## 技術スタック
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+| 役割             | 技術            |
+| ---------------- | --------------- |
+| UIフレームワーク | Flutter         |
+| 状態管理         | Riverpod        |
+| DB               | Drift（SQLite） |
+| ナビゲーション   | go_router       |
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 開発環境
+
+- Flutter 3.x
+- Dart 3.x
+- Android Studio / VS Code
