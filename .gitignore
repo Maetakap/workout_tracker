@@ -44,21 +44,6 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Android
-gradle-wrapper.jar
-/.gradle
-/captures/
-/gradlew
-/gradlew.bat
-/local.properties
-GeneratedPluginRegistrant.java
-.cxx/
-
-# Signing（署名キーは絶対にコミットしない）
-key.properties
-**/*.keystore
-**/*.jks
-
 # Generated Drift/Riverpod files
 *.g.dart
 
