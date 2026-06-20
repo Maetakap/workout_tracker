@@ -161,7 +161,7 @@ class _SetRow extends StatelessWidget {
           ),
           _Badge('$weight kg'),
           const SizedBox(width: 6),
-          _Badge('${set.reps} 回'),
+          _Badge('${set.reps} REP'),
           const SizedBox(width: 6),
           _Badge('RIR ${set.rir}'),
         ],
