@@ -40,11 +40,6 @@ class WorkoutListState {
         .toList();
   }
 
-  /// セッションの総セット数を返す
-  int setCountForSession(int sessionId) {
-    return sets.where((s) => s.sessionId == sessionId).length;
-  }
-
   /// フィルター適用済みセッション一覧
   List<WorkoutSession> get filteredSessions {
     return sessions.where((session) {

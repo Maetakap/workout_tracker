@@ -56,9 +56,6 @@ class WorkoutListScreen extends ConsumerWidget {
                       final exerciseNames = state.exerciseNamesForSession(
                         session.sessionId,
                       );
-                      final setCount = state.setCountForSession(
-                        session.sessionId,
-                      );
                       return SwipeableListItem(
                         key: ValueKey(session.sessionId),
                         onDeleteConfirm: () => showConfirmDialog(
@@ -81,7 +78,7 @@ class WorkoutListScreen extends ConsumerWidget {
                         child: ListTile(
                           title: Text(_formatDate(session.date)),
                           subtitle: Text(
-                            '${exerciseNames.join('・')} · $setCount セット',
+                            exerciseNames.join('・'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
