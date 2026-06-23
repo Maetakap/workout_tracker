@@ -212,7 +212,7 @@ class _SetRowState extends State<SetRow> {
                 ),
               ),
               items: List.generate(
-                5,
+                6,
                 (i) => DropdownMenuItem(value: i, child: Text('$i')),
               ),
               onChanged: (v) => widget.notifier.updateRir(
