@@ -81,7 +81,19 @@ class _DetailBody extends StatelessWidget {
               _formatDate(session.date),
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            _StarDisplay(focusLevel: session.focusLevel),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '没頭度',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: Colors.grey),
+                ),
+                const SizedBox(width: 4),
+                _StarDisplay(focusLevel: session.focusLevel),
+              ],
+            ),
           ],
         ),
         const SizedBox(height: 16),
