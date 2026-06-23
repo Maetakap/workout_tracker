@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/database/app_database.dart';
 import '../exercise_master/exercise_master_notifier.dart';
+import '../shared/workout_widgets.dart';
 import 'workout_input_notifier.dart';
 import 'workout_input_state.dart';
 
@@ -40,13 +41,13 @@ class WorkoutInputScreen extends ConsumerWidget {
                   label: const Text('種目を追加'),
                 ),
                 const SizedBox(height: 16),
-                const _SectionLabel('没頭度'),
-                _StarInput(
+                const SectionLabel('没頭度'),
+                StarInput(
                   value: state.focusLevel,
                   onChanged: notifier.setFocusLevel,
                 ),
                 const SizedBox(height: 16),
-                const _SectionLabel('メモ（任意）'),
+                const SectionLabel('メモ（任意）'),
                 TextField(
                   maxLength: 200,
                   maxLines: 3,
@@ -57,28 +58,17 @@ class WorkoutInputScreen extends ConsumerWidget {
                   ),
                   onChanged: notifier.setMemo,
                 ),
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: state.canSave() && !state.isSaving
-                      ? () async {
-                          await notifier.saveSession();
-                          if (context.mounted) context.go('/list');
-                        }
-                      : null,
-                  child: state.isSaving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('保存'),
-                ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 8),
               ],
             ),
+      bottomNavigationBar: SaveBar(
+        canSave: state.canSave() && !state.isSaving,
+        isSaving: state.isSaving,
+        onSave: () async {
+          await notifier.saveSession();
+          if (context.mounted) context.go('/list');
+        },
+      ),
     );
   }
 }
@@ -375,48 +365,6 @@ class _SetRowState extends State<_SetRow> {
                 : const SizedBox.shrink(),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StarInput extends StatelessWidget {
-  const _StarInput({required this.value, required this.onChanged});
-
-  final int? value;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(5, (i) {
-        final selected = value != null && i < value!;
-        return IconButton(
-          icon: Icon(
-            selected ? Icons.star : Icons.star_border,
-            color: Colors.amber,
-          ),
-          onPressed: () => onChanged(i + 1),
-        );
-      }),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.labelMedium?.copyWith(color: Colors.grey),
       ),
     );
   }

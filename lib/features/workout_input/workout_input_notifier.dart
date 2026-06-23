@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
@@ -115,7 +116,9 @@ class WorkoutInputNotifier extends Notifier<WorkoutInputState> {
       ref.invalidate(workoutListProvider);
       // 入力状態をリセット
       state = WorkoutInputState();
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('saveSession error: $e');
+      debugPrint('$st');
       state = state.copyWith(isSaving: false);
       rethrow;
     }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/database/app_database.dart';
 import '../exercise_master/exercise_master_notifier.dart';
+import '../shared/workout_widgets.dart';
 import '../workout_input/workout_input_state.dart';
 import 'workout_edit_notifier.dart';
 import 'workout_edit_state.dart';
@@ -73,67 +74,56 @@ class _EditFormState extends ConsumerState<_EditForm> {
     final notifier = ref.read(workoutEditProvider(widget.sessionId).notifier);
     final editState = widget.editState;
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        ...editState.exerciseCards.asMap().entries.map((entry) {
-          return _ExerciseCard(
-            key: ValueKey(entry.key),
-            cardIndex: entry.key,
-            card: entry.value,
-            exercises: widget.exercises,
-            canRemove: editState.exerciseCards.length > 1,
-            notifier: notifier,
-          );
-        }),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: notifier.addExerciseCard,
-          icon: const Icon(Icons.add),
-          label: const Text('種目を追加'),
-        ),
-        const SizedBox(height: 16),
-        const _SectionLabel('没頭度'),
-        _StarInput(
-          value: editState.focusLevel,
-          onChanged: notifier.setFocusLevel,
-        ),
-        const SizedBox(height: 16),
-        const _SectionLabel('メモ（任意）'),
-        TextField(
-          controller: _memoController,
-          maxLength: 200,
-          maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: '例）肘を腰に差す感じでやると良い',
-            hintStyle: TextStyle(color: Colors.grey),
-            border: OutlineInputBorder(),
+    return Scaffold(
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ...editState.exerciseCards.asMap().entries.map((entry) {
+            return _ExerciseCard(
+              key: ValueKey(entry.key),
+              cardIndex: entry.key,
+              card: entry.value,
+              exercises: widget.exercises,
+              canRemove: editState.exerciseCards.length > 1,
+              notifier: notifier,
+            );
+          }),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            onPressed: notifier.addExerciseCard,
+            icon: const Icon(Icons.add),
+            label: const Text('種目を追加'),
           ),
-          onChanged: notifier.setMemo,
-        ),
-        const SizedBox(height: 16),
-        FilledButton(
-          onPressed: editState.canSave() && !editState.isSaving
-              ? () async {
-                  final success = await notifier.save();
-                  if (success && context.mounted) {
-                    context.pop();
-                  }
-                }
-              : null,
-          child: editState.isSaving
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : const Text('保存'),
-        ),
-        const SizedBox(height: 32),
-      ],
+          const SizedBox(height: 16),
+          const SectionLabel('没頭度'),
+          StarInput(
+            value: editState.focusLevel,
+            onChanged: notifier.setFocusLevel,
+          ),
+          const SizedBox(height: 16),
+          const SectionLabel('メモ（任意）'),
+          TextField(
+            controller: _memoController,
+            maxLength: 200,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              hintText: '例）肘を腰に差す感じでやると良い',
+              hintStyle: TextStyle(color: Colors.grey),
+              border: OutlineInputBorder(),
+            ),
+            onChanged: notifier.setMemo,
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+      bottomNavigationBar: SaveBar(
+        canSave: editState.canSave() && !editState.isSaving,
+        isSaving: editState.isSaving,
+        onSave: () async {
+          final success = await notifier.save();
+          if (success && context.mounted) context.pop();
+        },
+      ),
     );
   }
 }
@@ -374,6 +364,7 @@ class _SetRowState extends State<_SetRow> {
               isDense: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
+                isDense: true,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 8,
                   vertical: 8,
@@ -404,48 +395,6 @@ class _SetRowState extends State<_SetRow> {
                 : const SizedBox.shrink(),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _StarInput extends StatelessWidget {
-  const _StarInput({required this.value, required this.onChanged});
-
-  final int? value;
-  final ValueChanged<int> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: List.generate(5, (i) {
-        final selected = value != null && i < value!;
-        return IconButton(
-          icon: Icon(
-            selected ? Icons.star : Icons.star_border,
-            color: Colors.amber,
-          ),
-          onPressed: () => onChanged(i + 1),
-        );
-      }),
-    );
-  }
-}
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        label,
-        style: Theme.of(
-          context,
-        ).textTheme.labelMedium?.copyWith(color: Colors.grey),
       ),
     );
   }
