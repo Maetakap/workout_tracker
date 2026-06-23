@@ -54,14 +54,18 @@ class StarInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(5, (i) {
         final selected = value != null && i < value!;
-        return IconButton(
-          icon: Icon(
-            selected ? Icons.star : Icons.star_border,
-            color: Colors.amber,
+        return Expanded(
+          child: IconButton(
+            icon: Icon(
+              selected ? Icons.star : Icons.star_border,
+              color: Colors.amber,
+              size: 36,
+            ),
+            onPressed: () => onChanged(i + 1),
           ),
-          onPressed: () => onChanged(i + 1),
         );
       }),
     );
