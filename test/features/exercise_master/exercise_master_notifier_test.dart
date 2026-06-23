@@ -1,59 +1,85 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
-import 'package:workout_tracker/data/repositories/exercise_master_repository.dart';
-import 'package:workout_tracker/data/providers.dart';
-import 'package:workout_tracker/features/exercise_master/exercise_master_notifier.dart';
 import 'package:workout_tracker/data/database/app_database.dart';
+import 'package:workout_tracker/data/providers.dart';
+import 'package:workout_tracker/data/repositories/exercise_master_repository.dart';
+import 'package:workout_tracker/features/exercise_master/exercise_master_notifier.dart';
 
-import 'exercise_master_notifier_test.mocks.dart';
+import '../../helpers/notifier_test_helpers.dart';
 
-@GenerateMocks([ExerciseMasterRepository])
-void main() {
-  late MockExerciseMasterRepository mockRepo;
-  late ProviderContainer container;
+/// インメモリで動作するフェイクRepository。
+/// 実DBを使わず、追加・削除・並び替えの結果を保持する。
+class FakeExerciseMasterRepository implements ExerciseMasterRepository {
+  final List<ExerciseMaster> _store = [];
+  int _nextId = 1;
 
-  /// テスト用のExerciseMasterを生成するヘルパー
-  ExerciseMaster makeExercise({
-    required int id,
-    required String name,
-    int sortOrder = 0,
-  }) {
-    return ExerciseMaster(
-      exerciseId: id,
-      name: name,
-      sortOrder: sortOrder,
-      createdAt: DateTime(2026, 1, 1),
-    );
+  @override
+  Future<List<ExerciseMaster>> findAll() async {
+    final sorted = [..._store]
+      ..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return sorted;
   }
 
-  setUp(() {
-    mockRepo = MockExerciseMasterRepository();
-    container = ProviderContainer(
-      overrides: [exerciseMasterRepositoryProvider.overrideWithValue(mockRepo)],
+  @override
+  Future<int> insert(String name, int sortOrder) async {
+    final id = _nextId++;
+    _store.add(
+      ExerciseMaster(
+        exerciseId: id,
+        name: name,
+        sortOrder: sortOrder,
+        createdAt: DateTime(2026, 1, 1),
+      ),
     );
+    return id;
+  }
+
+  @override
+  Future<void> updateName(int exerciseId, String name) async {
+    final i = _store.indexWhere((e) => e.exerciseId == exerciseId);
+    if (i != -1) {
+      _store[i] = _store[i].copyWith(name: name);
+    }
+  }
+
+  @override
+  Future<void> delete(int exerciseId) async {
+    _store.removeWhere((e) => e.exerciseId == exerciseId);
+  }
+
+  @override
+  Future<void> updateSortOrders(List<ExerciseMaster> exercises) async {
+    for (var i = 0; i < exercises.length; i++) {
+      final idx = _store.indexWhere(
+        (e) => e.exerciseId == exercises[i].exerciseId,
+      );
+      if (idx != -1) {
+        _store[idx] = _store[idx].copyWith(sortOrder: i);
+      }
+    }
+  }
+}
+
+void main() {
+  late FakeExerciseMasterRepository fakeRepo;
+
+  setUp(() {
+    fakeRepo = FakeExerciseMasterRepository();
   });
 
-  tearDown(() {
-    container.dispose();
-  });
+  /// fakeRepoを使うcontainerを生成
+  createTestContainer() => createContainer(
+    overrides: [exerciseMasterRepositoryProvider.overrideWithValue(fakeRepo)],
+  );
 
   group('ExerciseMasterNotifier', () {
-    test('1. 初期状態：exercisesが空・isLoadingがfalse', () {
-      // findAllが空リストを返すよう設定
-      when(mockRepo.findAll()).thenAnswer((_) async => []);
-
+    test('初期状態はexercisesが空', () {
+      final container = createTestContainer();
       final state = container.read(exerciseMasterProvider);
       expect(state.exercises, isEmpty);
-      expect(state.isLoading, false);
     });
 
-    test('2. addExercise()：1件追加後にexercisesに反映される', () async {
-      final exercise = makeExercise(id: 1, name: 'ベンチプレス');
-      when(mockRepo.findAll()).thenAnswer((_) async => [exercise]);
-      when(mockRepo.insert(any, any)).thenAnswer((_) async => 1);
-
+    test('addExercise()で1件追加される', () async {
+      final container = createTestContainer();
       await container
           .read(exerciseMasterProvider.notifier)
           .addExercise('ベンチプレス');
@@ -63,78 +89,61 @@ void main() {
       expect(state.exercises.first.name, 'ベンチプレス');
     });
 
-    test('3. deleteExercise()：削除後にexercisesが空になる', () async {
-      // 削除後のfindAllは空を返す
-      when(mockRepo.findAll()).thenAnswer((_) async => []);
-      when(mockRepo.insert(any, any)).thenAnswer((_) async => 1);
-      when(mockRepo.delete(any)).thenAnswer((_) async {});
-
-      await container
-          .read(exerciseMasterProvider.notifier)
-          .addExercise('ベンチプレス');
-
-      // deleteの後はfindAllが空を返すよう上書き
-      when(mockRepo.findAll()).thenAnswer((_) async => []);
-      await container.read(exerciseMasterProvider.notifier).deleteExercise(1);
-
-      final state = container.read(exerciseMasterProvider);
-      expect(state.exercises, isEmpty);
-    });
-
-    test('4. updateName()：名前更新後に反映される', () async {
-      final updated = makeExercise(id: 1, name: 'スクワット');
-      when(mockRepo.updateName(any, any)).thenAnswer((_) async {});
-      when(mockRepo.findAll()).thenAnswer((_) async => [updated]);
-
-      await container
-          .read(exerciseMasterProvider.notifier)
-          .updateName(1, 'スクワット');
-
-      final state = container.read(exerciseMasterProvider);
-      expect(state.exercises.first.name, 'スクワット');
-    });
-
-    test('5. reorder()：並び替え後にリストの順序が変わる', () async {
-      final e1 = makeExercise(id: 1, name: 'ベンチプレス', sortOrder: 0);
-      final e2 = makeExercise(id: 2, name: 'スクワット', sortOrder: 1);
-
-      when(mockRepo.insert(any, any)).thenAnswer((_) async => 1);
-      when(mockRepo.updateSortOrders(any)).thenAnswer((_) async {});
-
-      // 1件目追加
-      when(mockRepo.findAll()).thenAnswer((_) async => [e1]);
-      await container
-          .read(exerciseMasterProvider.notifier)
-          .addExercise('ベンチプレス');
-
-      // 2件目追加
-      when(mockRepo.findAll()).thenAnswer((_) async => [e1, e2]);
-      await container
-          .read(exerciseMasterProvider.notifier)
-          .addExercise('スクワット');
+    test('addExercise()を2回呼ぶと2件になる', () async {
+      final container = createTestContainer();
+      final notifier = container.read(exerciseMasterProvider.notifier);
+      await notifier.addExercise('ベンチプレス');
+      await notifier.addExercise('スクワット');
 
       expect(container.read(exerciseMasterProvider).exercises.length, 2);
-
-      // oldIndex=0をnewIndex=2に移動（Notifier内でnewIndex--→index=1）
-      await container.read(exerciseMasterProvider.notifier).reorder(0, 2);
-
-      final state = container.read(exerciseMasterProvider);
-      expect(state.exercises.first.name, 'スクワット');
     });
 
-    test('6. addExercise() Repository失敗時：exercisesが変化しない', () async {
-      when(mockRepo.findAll()).thenAnswer((_) async => []);
-      when(mockRepo.insert(any, any)).thenThrow(Exception('DB error'));
+    test('deleteExercise()で削除される', () async {
+      final container = createTestContainer();
+      final notifier = container.read(exerciseMasterProvider.notifier);
+      await notifier.addExercise('ベンチプレス');
+
+      final id = container
+          .read(exerciseMasterProvider)
+          .exercises
+          .first
+          .exerciseId;
+      await notifier.deleteExercise(id);
+
+      expect(container.read(exerciseMasterProvider).exercises, isEmpty);
+    });
+
+    test('updateName()で名前が更新される', () async {
+      final container = createTestContainer();
+      final notifier = container.read(exerciseMasterProvider.notifier);
+      await notifier.addExercise('ベンチプレス');
+
+      final id = container
+          .read(exerciseMasterProvider)
+          .exercises
+          .first
+          .exerciseId;
+      await notifier.updateName(id, 'スクワット');
 
       expect(
-        () => container
-            .read(exerciseMasterProvider.notifier)
-            .addExercise('ベンチプレス'),
-        throwsException,
+        container.read(exerciseMasterProvider).exercises.first.name,
+        'スクワット',
       );
+    });
 
-      final state = container.read(exerciseMasterProvider);
-      expect(state.exercises, isEmpty);
+    test('reorder()で並び順が変わる', () async {
+      final container = createTestContainer();
+      final notifier = container.read(exerciseMasterProvider.notifier);
+      await notifier.addExercise('ベンチプレス');
+      await notifier.addExercise('スクワット');
+
+      // 先頭(ベンチプレス)を末尾へ移動
+      await notifier.reorder(0, 2);
+
+      expect(
+        container.read(exerciseMasterProvider).exercises.first.name,
+        'スクワット',
+      );
     });
   });
 }

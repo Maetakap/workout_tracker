@@ -8,6 +8,9 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  // テスト用：任意のQueryExecutor（インメモリDBなど）を注入できる
+  AppDatabase.forTesting(super.executor);
+
   @override
   int get schemaVersion => 1;
 

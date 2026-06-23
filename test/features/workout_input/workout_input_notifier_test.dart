@@ -1,184 +1,236 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
+import 'package:workout_tracker/data/database/app_database.dart';
 import 'package:workout_tracker/data/providers.dart';
 import 'package:workout_tracker/data/repositories/exercise_master_repository.dart';
 import 'package:workout_tracker/data/repositories/workout_session_repository.dart';
 import 'package:workout_tracker/data/repositories/workout_set_repository.dart';
 import 'package:workout_tracker/features/workout_input/workout_input_notifier.dart';
-import 'package:workout_tracker/features/workout_input/workout_input_state.dart';
-import 'package:workout_tracker/features/workout_list/workout_list_notifier.dart';
 
-import 'workout_input_notifier_test.mocks.dart';
+import '../../helpers/notifier_test_helpers.dart';
 
-@GenerateMocks([
-  WorkoutSessionRepository,
-  WorkoutSetRepository,
-  ExerciseMasterRepository,
-])
+/// セッション保存を記録するフェイクRepository
+class FakeSessionRepo implements WorkoutSessionRepository {
+  bool throwOnInsert = false;
+  int? insertedFocusLevel;
+  String? insertedMemo;
+
+  @override
+  Future<List<WorkoutSession>> findAll() async => [];
+
+  @override
+  Future<int> insert({
+    required DateTime date,
+    required int focusLevel,
+    String? memo,
+  }) async {
+    if (throwOnInsert) throw Exception('DB error');
+    insertedFocusLevel = focusLevel;
+    insertedMemo = memo;
+    return 1; // sessionId
+  }
+
+  @override
+  noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} は未使用');
+}
+
+/// セット保存を記録するフェイクRepository
+class FakeSetRepo implements WorkoutSetRepository {
+  List<WorkoutSetsCompanion> insertedSets = [];
+
+  @override
+  Future<List<WorkoutSet>> findAll() async => [];
+
+  @override
+  Future<void> insertAll(List<WorkoutSetsCompanion> sets) async {
+    insertedSets = sets;
+  }
+
+  @override
+  noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} は未使用');
+}
+
+/// 種目用フェイクRepository
+class FakeExerciseRepo implements ExerciseMasterRepository {
+  @override
+  Future<List<ExerciseMaster>> findAll() async => [];
+
+  @override
+  noSuchMethod(Invocation invocation) =>
+      throw UnimplementedError('${invocation.memberName} は未使用');
+}
+
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
-  late MockWorkoutSessionRepository mockSessionRepo;
-  late MockWorkoutSetRepository mockSetRepo;
-  late MockExerciseMasterRepository mockExerciseRepo;
-  late ProviderContainer container;
+  late FakeSessionRepo fakeSessionRepo;
+  late FakeSetRepo fakeSetRepo;
+  late FakeExerciseRepo fakeExerciseRepo;
 
   setUp(() {
-    mockSessionRepo = MockWorkoutSessionRepository();
-    mockSetRepo = MockWorkoutSetRepository();
-    mockExerciseRepo = MockExerciseMasterRepository();
-
-    when(mockExerciseRepo.findAll()).thenAnswer((_) async => []);
-    when(mockSetRepo.findAll()).thenAnswer((_) async => []);
-    when(mockSessionRepo.findAll()).thenAnswer((_) async => []);
-
-    container = ProviderContainer(
-      overrides: [
-        workoutSessionRepositoryProvider.overrideWithValue(mockSessionRepo),
-        workoutSetRepositoryProvider.overrideWithValue(mockSetRepo),
-        exerciseMasterRepositoryProvider.overrideWithValue(mockExerciseRepo),
-      ],
-    );
-    // workoutListProviderを購読してinvalidate後のエラーを吸収
-    container.listen(workoutListProvider, (_, _) {}, onError: (_, _) {});
-    // tearDownをsetUp内でaddTearDownとして登録
-    addTearDown(() async {
-      await Future.microtask(() {});
-      container.dispose();
-    });
+    fakeSessionRepo = FakeSessionRepo();
+    fakeSetRepo = FakeSetRepo();
+    fakeExerciseRepo = FakeExerciseRepo();
   });
 
-  WorkoutInputNotifier notifier() =>
-      container.read(workoutInputProvider.notifier);
+  createTestContainer() => createContainer(
+    overrides: [
+      workoutSessionRepositoryProvider.overrideWithValue(fakeSessionRepo),
+      workoutSetRepositoryProvider.overrideWithValue(fakeSetRepo),
+      exerciseMasterRepositoryProvider.overrideWithValue(fakeExerciseRepo),
+    ],
+  );
 
-  WorkoutInputState currentState() => container.read(workoutInputProvider);
-
-  group('WorkoutInputNotifier', () {
-    test('1. 初期状態：exerciseCards1件・focusLevelがnull・isSavingがfalse', () {
-      expect(currentState().exerciseCards.length, 1);
-      expect(currentState().focusLevel, null);
-      expect(currentState().isSaving, false);
+  group('WorkoutInputNotifier 状態操作', () {
+    test('初期状態はカード1件・focusLevelがnull', () {
+      final container = createTestContainer();
+      final state = container.read(workoutInputProvider);
+      expect(state.exerciseCards.length, 1);
+      expect(state.focusLevel, null);
+      expect(state.isSaving, false);
     });
 
-    test('2. addExerciseCard()：カードが1件増える', () {
-      notifier().addExerciseCard();
-      expect(currentState().exerciseCards.length, 2);
+    test('addExerciseCard()でカードが増える', () {
+      final container = createTestContainer();
+      container.read(workoutInputProvider.notifier).addExerciseCard();
+      expect(container.read(workoutInputProvider).exerciseCards.length, 2);
     });
 
-    test('3. removeExerciseCard() 2枚以上：指定カードが削除される', () {
-      notifier().addExerciseCard();
-      expect(currentState().exerciseCards.length, 2);
-      notifier().removeExerciseCard(0);
-      expect(currentState().exerciseCards.length, 1);
+    test('removeExerciseCard()は2枚以上のとき削除できる', () {
+      final container = createTestContainer();
+      final notifier = container.read(workoutInputProvider.notifier);
+      notifier.addExerciseCard();
+      notifier.removeExerciseCard(0);
+      expect(container.read(workoutInputProvider).exerciseCards.length, 1);
     });
 
-    test('4. removeExerciseCard() 1枚のみ：削除されない', () {
-      notifier().removeExerciseCard(0);
-      expect(currentState().exerciseCards.length, 1);
+    test('removeExerciseCard()は1枚のときは削除しない', () {
+      final container = createTestContainer();
+      container.read(workoutInputProvider.notifier).removeExerciseCard(0);
+      expect(container.read(workoutInputProvider).exerciseCards.length, 1);
     });
 
-    test('5. addSet()：対象カードのセットが1件増え、前セットのweightKgのみコピーされる', () {
-      notifier().updateWeight(0, 0, 60.0);
-      notifier().updateReps(0, 0, 10);
-      notifier().updateRir(0, 0, 2);
-      notifier().addSet(0);
+    test('addSet()は前セットのweightKgのみコピーする', () {
+      final container = createTestContainer();
+      final notifier = container.read(workoutInputProvider.notifier);
+      notifier.updateWeight(0, 0, 60.0);
+      notifier.updateReps(0, 0, 10);
+      notifier.updateRir(0, 0, 2);
+      notifier.addSet(0);
 
-      final sets = currentState().exerciseCards[0].sets;
+      final sets = container.read(workoutInputProvider).exerciseCards[0].sets;
       expect(sets.length, 2);
       expect(sets[1].weightKg, 60.0);
       expect(sets[1].reps, null);
       expect(sets[1].rir, null);
     });
 
-    test('6. removeSet() 2件以上：指定セットが削除される', () {
-      notifier().addSet(0);
-      expect(currentState().exerciseCards[0].sets.length, 2);
-      notifier().removeSet(0, 0);
-      expect(currentState().exerciseCards[0].sets.length, 1);
+    test('removeSet()は2件以上のとき削除できる', () {
+      final container = createTestContainer();
+      final notifier = container.read(workoutInputProvider.notifier);
+      notifier.addSet(0);
+      notifier.removeSet(0, 0);
+      expect(
+        container.read(workoutInputProvider).exerciseCards[0].sets.length,
+        1,
+      );
     });
 
-    test('7. removeSet() 1件のみ：削除されない', () {
-      notifier().removeSet(0, 0);
-      expect(currentState().exerciseCards[0].sets.length, 1);
+    test('removeSet()は1件のときは削除しない', () {
+      final container = createTestContainer();
+      container.read(workoutInputProvider.notifier).removeSet(0, 0);
+      expect(
+        container.read(workoutInputProvider).exerciseCards[0].sets.length,
+        1,
+      );
     });
 
-    test('8. updateWeight()：指定カード・指定セットのweightKgのみ更新される', () {
-      notifier().addSet(0);
-      notifier().updateWeight(0, 0, 80.0);
-      expect(currentState().exerciseCards[0].sets[0].weightKg, 80.0);
-      expect(currentState().exerciseCards[0].sets[1].weightKg, null);
+    test('updateWeight()は指定セットのみ更新する', () {
+      final container = createTestContainer();
+      final notifier = container.read(workoutInputProvider.notifier);
+      notifier.addSet(0);
+      notifier.updateWeight(0, 0, 80.0);
+      final sets = container.read(workoutInputProvider).exerciseCards[0].sets;
+      expect(sets[0].weightKg, 80.0);
+      expect(sets[1].weightKg, null);
     });
 
-    test('9. updateReps()：指定セットのrepsが更新される', () {
-      notifier().updateReps(0, 0, 12);
-      expect(currentState().exerciseCards[0].sets[0].reps, 12);
+    test('setFocusLevel()でfocusLevelが更新される', () {
+      final container = createTestContainer();
+      container.read(workoutInputProvider.notifier).setFocusLevel(4);
+      expect(container.read(workoutInputProvider).focusLevel, 4);
     });
 
-    test('10. updateRir()：指定セットのrirが更新される', () {
-      notifier().updateRir(0, 0, 3);
-      expect(currentState().exerciseCards[0].sets[0].rir, 3);
+    test('setMemo()でmemoが更新される', () {
+      final container = createTestContainer();
+      container.read(workoutInputProvider.notifier).setMemo('テストメモ');
+      expect(container.read(workoutInputProvider).memo, 'テストメモ');
+    });
+  });
+
+  group('WorkoutInputNotifier saveSession', () {
+    // canSave()がtrueになる状態をセットアップ
+    void fillValidInput(container) {
+      final notifier = container.read(workoutInputProvider.notifier);
+      notifier.setExerciseId(0, 1);
+      notifier.updateWeight(0, 0, 60.0);
+      notifier.updateReps(0, 0, 10);
+      notifier.updateRir(0, 0, 2);
+      notifier.setFocusLevel(3);
+    }
+
+    test('保存成功で状態がリセットされる', () async {
+      final container = createTestContainer();
+      fillValidInput(container);
+      container.read(workoutInputProvider.notifier).setMemo('がんばった');
+
+      await container.read(workoutInputProvider.notifier).saveSession();
+      await settle();
+
+      // Repositoryに正しい値が渡る
+      expect(fakeSessionRepo.insertedFocusLevel, 3);
+      expect(fakeSessionRepo.insertedMemo, 'がんばった');
+      expect(fakeSetRepo.insertedSets.length, 1);
+
+      // 保存後リセット
+      final state = container.read(workoutInputProvider);
+      expect(state.focusLevel, null);
+      expect(state.isSaving, false);
     });
 
-    test('11. setFocusLevel()：focusLevelが更新される', () {
-      notifier().setFocusLevel(4);
-      expect(currentState().focusLevel, 4);
+    test('保存したセットにsetOrderが通し番号で振られる', () async {
+      final container = createTestContainer();
+      final notifier = container.read(workoutInputProvider.notifier);
+      // 1種目2セット
+      notifier.setExerciseId(0, 1);
+      notifier.updateWeight(0, 0, 60.0);
+      notifier.updateReps(0, 0, 10);
+      notifier.updateRir(0, 0, 2);
+      notifier.addSet(0);
+      notifier.updateReps(0, 1, 8);
+      notifier.updateRir(0, 1, 3);
+      notifier.setFocusLevel(3);
+
+      await notifier.saveSession();
+      await settle();
+
+      final sets = fakeSetRepo.insertedSets;
+      expect(sets.length, 2);
+      expect((sets[0].setOrder as Value).value, 0);
+      expect((sets[1].setOrder as Value).value, 1);
     });
 
-    test('12. setMemo()：memoが更新される', () {
-      notifier().setMemo('テストメモ');
-      expect(currentState().memo, 'テストメモ');
-    });
-
-    test('13. saveSession() 成功：isSavingがfalseに戻り状態がリセットされる', () async {
-      notifier().setExerciseId(0, 1);
-      notifier().updateWeight(0, 0, 60.0);
-      notifier().updateReps(0, 0, 10);
-      notifier().updateRir(0, 0, 2);
-      notifier().setFocusLevel(3);
-
-      when(
-        mockSessionRepo.insert(
-          date: anyNamed('date'),
-          focusLevel: anyNamed('focusLevel'),
-          memo: anyNamed('memo'),
-        ),
-      ).thenAnswer((_) async => 1);
-      when(mockSetRepo.insertAll(any)).thenAnswer((_) async {});
-      // findAllはinvalidate後に呼ばれるのでスタブを設定
-      when(mockSessionRepo.findAll()).thenAnswer((_) async => []);
-      when(mockSetRepo.findAll()).thenAnswer((_) async => []);
-
-      await notifier().saveSession();
-      // 非同期の後続処理を完了させてからdisposeされるよう待つ
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      expect(currentState().exerciseCards.length, 1);
-      expect(currentState().focusLevel, null);
-      expect(currentState().isSaving, false);
-    });
-
-    test('14. saveSession() Repository失敗時：isSavingがfalseに戻る', () async {
-      notifier().setExerciseId(0, 1);
-      notifier().updateWeight(0, 0, 60.0);
-      notifier().updateReps(0, 0, 10);
-      notifier().updateRir(0, 0, 2);
-      notifier().setFocusLevel(3);
-
-      when(
-        mockSessionRepo.insert(
-          date: anyNamed('date'),
-          focusLevel: anyNamed('focusLevel'),
-          memo: anyNamed('memo'),
-        ),
-      ).thenThrow(Exception('DB error'));
+    test('Repository失敗時はisSavingがfalseに戻る', () async {
+      final container = createTestContainer();
+      fillValidInput(container);
+      fakeSessionRepo.throwOnInsert = true;
 
       try {
-        await notifier().saveSession();
+        await container.read(workoutInputProvider.notifier).saveSession();
       } catch (_) {}
+      await settle();
 
-      expect(currentState().isSaving, false);
+      expect(container.read(workoutInputProvider).isSaving, false);
     });
   });
 }
