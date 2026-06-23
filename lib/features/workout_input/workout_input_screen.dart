@@ -334,6 +334,7 @@ class _SetRowState extends State<_SetRow> {
               isDense: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
+                isDense: true,
                 contentPadding: EdgeInsets.symmetric(
                   horizontal: 8,
                   vertical: 8,
