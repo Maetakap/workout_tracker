@@ -2,31 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
+import '../shared/workout_form_notifier.dart';
 import '../workout_list/workout_list_notifier.dart';
 import 'workout_input_state.dart';
 
-class WorkoutInputNotifier extends Notifier<WorkoutInputState> {
+class WorkoutInputNotifier extends Notifier<WorkoutInputState>
+    implements WorkoutFormNotifier {
   @override
   WorkoutInputState build() => WorkoutInputState();
 
+  @override
   void addExerciseCard() {
     state = state.copyWith(
       exerciseCards: [...state.exerciseCards, ExerciseCardState()],
     );
   }
 
+  @override
   void removeExerciseCard(int cardIndex) {
     if (state.exerciseCards.length <= 1) return;
     final list = [...state.exerciseCards]..removeAt(cardIndex);
     state = state.copyWith(exerciseCards: list);
   }
 
+  @override
   void setExerciseId(int cardIndex, int exerciseId) {
     final list = [...state.exerciseCards];
     list[cardIndex] = list[cardIndex].copyWith(exerciseId: exerciseId);
     state = state.copyWith(exerciseCards: list);
   }
 
+  @override
   void addSet(int cardIndex) {
     final list = [...state.exerciseCards];
     final card = list[cardIndex];
@@ -37,6 +43,7 @@ class WorkoutInputNotifier extends Notifier<WorkoutInputState> {
     state = state.copyWith(exerciseCards: list);
   }
 
+  @override
   void removeSet(int cardIndex, int setIndex) {
     final card = state.exerciseCards[cardIndex];
     if (card.sets.length <= 1) return;
@@ -46,14 +53,17 @@ class WorkoutInputNotifier extends Notifier<WorkoutInputState> {
     state = state.copyWith(exerciseCards: list);
   }
 
+  @override
   void updateWeight(int cardIndex, int setIndex, double? value) {
     _updateSet(cardIndex, setIndex, (s) => s.copyWith(weightKg: value));
   }
 
+  @override
   void updateReps(int cardIndex, int setIndex, int? value) {
     _updateSet(cardIndex, setIndex, (s) => s.copyWith(reps: value));
   }
 
+  @override
   void updateRir(int cardIndex, int setIndex, int? value) {
     _updateSet(cardIndex, setIndex, (s) => s.copyWith(rir: value));
   }

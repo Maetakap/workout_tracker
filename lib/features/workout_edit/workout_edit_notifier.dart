@@ -2,13 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
+import '../shared/workout_form_notifier.dart';
 import '../workout_detail/workout_detail_provider.dart';
 import '../workout_input/workout_input_state.dart';
 import '../workout_list/workout_list_notifier.dart';
 import 'workout_edit_state.dart';
 
 class WorkoutEditNotifier
-    extends AutoDisposeFamilyAsyncNotifier<WorkoutEditState, int> {
+    extends AutoDisposeFamilyAsyncNotifier<WorkoutEditState, int>
+    implements WorkoutFormNotifier {
   @override
   Future<WorkoutEditState> build(int arg) async {
     final session = await ref
@@ -42,6 +44,7 @@ class WorkoutEditNotifier
     );
   }
 
+  @override
   void addExerciseCard() {
     final current = state.requireValue;
     state = AsyncData(
@@ -51,6 +54,7 @@ class WorkoutEditNotifier
     );
   }
 
+  @override
   void removeExerciseCard(int cardIndex) {
     final current = state.requireValue;
     if (current.exerciseCards.length <= 1) return;
@@ -58,6 +62,7 @@ class WorkoutEditNotifier
     state = AsyncData(current.copyWith(exerciseCards: list));
   }
 
+  @override
   void setExerciseId(int cardIndex, int exerciseId) {
     final current = state.requireValue;
     final list = [...current.exerciseCards];
@@ -65,6 +70,7 @@ class WorkoutEditNotifier
     state = AsyncData(current.copyWith(exerciseCards: list));
   }
 
+  @override
   void addSet(int cardIndex) {
     final current = state.requireValue;
     final list = [...current.exerciseCards];
@@ -75,6 +81,7 @@ class WorkoutEditNotifier
     state = AsyncData(current.copyWith(exerciseCards: list));
   }
 
+  @override
   void removeSet(int cardIndex, int setIndex) {
     final current = state.requireValue;
     final list = [...current.exerciseCards];
@@ -85,14 +92,17 @@ class WorkoutEditNotifier
     state = AsyncData(current.copyWith(exerciseCards: list));
   }
 
+  @override
   void updateWeight(int cardIndex, int setIndex, double? value) {
     _updateSet(cardIndex, setIndex, (s) => s.copyWith(weightKg: value));
   }
 
+  @override
   void updateReps(int cardIndex, int setIndex, int? value) {
     _updateSet(cardIndex, setIndex, (s) => s.copyWith(reps: value));
   }
 
+  @override
   void updateRir(int cardIndex, int setIndex, int? value) {
     _updateSet(cardIndex, setIndex, (s) => s.copyWith(rir: value));
   }
