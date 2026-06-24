@@ -78,7 +78,7 @@ class _EditFormState extends ConsumerState<_EditForm> {
         children: [
           ...editState.exerciseCards.asMap().entries.map((entry) {
             return ExerciseCard(
-              key: ValueKey(entry.key),
+              key: ValueKey(entry.value.id),
               cardIndex: entry.key,
               card: entry.value,
               exercises: widget.exercises,

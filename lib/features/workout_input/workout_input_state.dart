@@ -20,14 +20,17 @@ class SetRowState {
 }
 
 class ExerciseCardState {
+  final String id;
   final int? exerciseId;
   final List<SetRowState> sets;
 
-  ExerciseCardState({this.exerciseId, List<SetRowState>? sets})
-    : sets = sets ?? [SetRowState()];
+  ExerciseCardState({String? id, this.exerciseId, List<SetRowState>? sets})
+    : id = id ?? UniqueKey().toString(),
+      sets = sets ?? [SetRowState()];
 
   ExerciseCardState copyWith({int? exerciseId, List<SetRowState>? sets}) {
     return ExerciseCardState(
+      id: id,
       exerciseId: exerciseId ?? this.exerciseId,
       sets: sets ?? this.sets,
     );

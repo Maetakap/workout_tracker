@@ -365,3 +365,49 @@ class ExerciseCard extends ConsumerWidget {
     );
   }
 }
+
+/// メモ入力欄（controller保持で再ビルドの影響を受けない）
+class MemoField extends StatefulWidget {
+  const MemoField({
+    super.key,
+    required this.initialValue,
+    required this.onChanged,
+  });
+
+  final String initialValue;
+  final ValueChanged<String> onChanged;
+
+  @override
+  State<MemoField> createState() => _MemoFieldState();
+}
+
+class _MemoFieldState extends State<MemoField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _controller,
+      maxLength: 200,
+      maxLines: 3,
+      decoration: const InputDecoration(
+        hintText: '例）肘を腰に差す感じでやると良い',
+        hintStyle: TextStyle(color: Colors.grey),
+        border: OutlineInputBorder(),
+      ),
+      onChanged: widget.onChanged,
+    );
+  }
+}

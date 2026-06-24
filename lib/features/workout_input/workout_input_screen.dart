@@ -23,7 +23,7 @@ class WorkoutInputScreen extends ConsumerWidget {
               children: [
                 ...state.exerciseCards.asMap().entries.map((entry) {
                   return ExerciseCard(
-                    key: ValueKey(entry.key),
+                    key: ValueKey(entry.value.id),
                     cardIndex: entry.key,
                     card: entry.value,
                     exercises: exercises,
@@ -45,14 +45,8 @@ class WorkoutInputScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 const SectionLabel('メモ（任意）'),
-                TextField(
-                  maxLength: 200,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    hintText: '例）肘を腰に差す感じでやると良い',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    border: OutlineInputBorder(),
-                  ),
+                MemoField(
+                  initialValue: state.memo,
                   onChanged: notifier.setMemo,
                 ),
                 const SizedBox(height: 8),
