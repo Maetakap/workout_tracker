@@ -37,7 +37,7 @@ class WorkoutEditScreen extends ConsumerWidget {
   }
 }
 
-class _EditForm extends ConsumerStatefulWidget {
+class _EditForm extends ConsumerWidget {
   const _EditForm({
     required this.sessionId,
     required this.editState,
@@ -49,28 +49,8 @@ class _EditForm extends ConsumerStatefulWidget {
   final List<ExerciseMaster> exercises;
 
   @override
-  ConsumerState<_EditForm> createState() => _EditFormState();
-}
-
-class _EditFormState extends ConsumerState<_EditForm> {
-  late final TextEditingController _memoController;
-
-  @override
-  void initState() {
-    super.initState();
-    _memoController = TextEditingController(text: widget.editState.memo);
-  }
-
-  @override
-  void dispose() {
-    _memoController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final notifier = ref.read(workoutEditProvider(widget.sessionId).notifier);
-    final editState = widget.editState;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(workoutEditProvider(sessionId).notifier);
 
     return Scaffold(
       body: ListView(
@@ -81,7 +61,7 @@ class _EditFormState extends ConsumerState<_EditForm> {
               key: ValueKey(entry.value.id),
               cardIndex: entry.key,
               card: entry.value,
-              exercises: widget.exercises,
+              exercises: exercises,
               canRemove: editState.exerciseCards.length > 1,
               notifier: notifier,
             );
@@ -100,17 +80,7 @@ class _EditFormState extends ConsumerState<_EditForm> {
           ),
           const SizedBox(height: 16),
           const SectionLabel('メモ（任意）'),
-          TextField(
-            controller: _memoController,
-            maxLength: 200,
-            maxLines: 3,
-            decoration: const InputDecoration(
-              hintText: '例）肘を腰に差す感じでやると良い',
-              hintStyle: TextStyle(color: Colors.grey),
-              border: OutlineInputBorder(),
-            ),
-            onChanged: notifier.setMemo,
-          ),
+          MemoField(initialValue: editState.memo, onChanged: notifier.setMemo),
           const SizedBox(height: 8),
         ],
       ),
