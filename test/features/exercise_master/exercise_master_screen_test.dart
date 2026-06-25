@@ -22,6 +22,7 @@ void main() {
   Future<void> pumpScreen(
     WidgetTester tester, {
     required ExerciseMasterState state,
+    Map<int, double?> oneRmMap = const {},
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -29,7 +30,7 @@ void main() {
           exerciseMasterProvider.overrideWith(
             () => _FakeExerciseMasterNotifier(state),
           ),
-          exerciseOneRmProvider.overrideWith((ref) async => <int, double?>{}),
+          exerciseOneRmProvider.overrideWith((ref) async => oneRmMap),
         ],
         child: const MaterialApp(home: ExerciseMasterScreen()),
       ),
@@ -77,6 +78,33 @@ void main() {
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
+  });
+
+  testWidgets('5. 記録のある種目に1RMが表示される', (tester) async {
+    await pumpScreen(
+      tester,
+      state: ExerciseMasterState(
+        exercises: [makeExercise(id: 1, name: 'ベンチプレス')],
+      ),
+      oneRmMap: {1: 100.0},
+    );
+    // FutureProviderの解決を待つ
+    await tester.pump();
+
+    expect(find.text('1RM 100.0 kg'), findsOneWidget);
+  });
+
+  testWidgets('6. 記録のない種目は「1RM -- kg」と表示される', (tester) async {
+    await pumpScreen(
+      tester,
+      state: ExerciseMasterState(
+        exercises: [makeExercise(id: 1, name: 'ベンチプレス')],
+      ),
+      oneRmMap: const {}, // 記録なし
+    );
+    await tester.pump();
+
+    expect(find.text('1RM -- kg'), findsOneWidget);
   });
 }
 
