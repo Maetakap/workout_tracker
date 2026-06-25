@@ -254,6 +254,7 @@ class ExerciseCard extends ConsumerWidget {
     required this.exercises,
     required this.canRemove,
     required this.notifier,
+    required this.disabledExerciseIds,
   });
 
   final int cardIndex;
@@ -261,6 +262,7 @@ class ExerciseCard extends ConsumerWidget {
   final List<ExerciseMaster> exercises;
   final bool canRemove;
   final WorkoutFormNotifier notifier;
+  final Set<int> disabledExerciseIds;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -285,6 +287,12 @@ class ExerciseCard extends ConsumerWidget {
                       border: OutlineInputBorder(),
                     ),
                     items: exercises
+                        .where(
+                          (e) =>
+                              // 自分が選択中の種目は残す。他カードで使用中の種目は除外
+                              e.exerciseId == card.exerciseId ||
+                              !disabledExerciseIds.contains(e.exerciseId),
+                        )
                         .map(
                           (e) => DropdownMenuItem(
                             value: e.exerciseId,

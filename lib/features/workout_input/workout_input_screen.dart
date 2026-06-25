@@ -29,6 +29,11 @@ class WorkoutInputScreen extends ConsumerWidget {
                     exercises: exercises,
                     canRemove: state.exerciseCards.length > 1,
                     notifier: notifier,
+                    disabledExerciseIds: state.exerciseCards
+                        .where((c) => c.id != entry.value.id) // 自分以外のカード
+                        .map((c) => c.exerciseId)
+                        .whereType<int>() // null除外
+                        .toSet(),
                   );
                 }),
                 const SizedBox(height: 12),

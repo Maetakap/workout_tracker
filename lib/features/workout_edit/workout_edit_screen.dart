@@ -64,6 +64,11 @@ class _EditForm extends ConsumerWidget {
               exercises: exercises,
               canRemove: editState.exerciseCards.length > 1,
               notifier: notifier,
+              disabledExerciseIds: editState.exerciseCards
+                  .where((c) => c.id != entry.value.id)
+                  .map((c) => c.exerciseId)
+                  .whereType<int>()
+                  .toSet(),
             );
           }),
           const SizedBox(height: 12),

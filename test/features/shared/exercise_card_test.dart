@@ -69,6 +69,7 @@ void main() {
     required ExerciseCardState card,
     required List<ExerciseMaster> exercises,
     bool canRemove = true,
+    Set<int> disabledExerciseIds = const {},
   }) async {
     await tester.pumpWidget(
       ProviderScope(
@@ -80,6 +81,7 @@ void main() {
               exercises: exercises,
               canRemove: canRemove,
               notifier: notifier,
+              disabledExerciseIds: disabledExerciseIds,
             ),
           ),
         ),
@@ -167,6 +169,41 @@ void main() {
 
       // カード削除・セット削除ともになし → closeアイコンは0個
       expect(find.byIcon(Icons.close), findsNothing);
+    });
+
+    testWidgets('7. disabledExerciseIdsの種目はドロップダウンに出ない', (tester) async {
+      await pumpExerciseCard(
+        tester,
+        card: ExerciseCardState(), // 未選択
+        exercises: [
+          makeExercise(id: 1, name: 'ベンチプレス'),
+          makeExercise(id: 2, name: 'スクワット'),
+        ],
+        disabledExerciseIds: {2}, // スクワットは他カードで使用中
+      );
+
+      // ドロップダウンを開く
+      await tester.tap(find.byType(DropdownButtonFormField<int>).first);
+      await tester.pumpAndSettle();
+
+      // ベンチプレスは選べる、スクワットは選択肢に出ない
+      expect(find.text('ベンチプレス'), findsWidgets);
+      expect(find.text('スクワット'), findsNothing);
+    });
+
+    testWidgets('8. 自分が選択中の種目はdisabledでも残る', (tester) async {
+      await pumpExerciseCard(
+        tester,
+        card: ExerciseCardState(exerciseId: 2), // スクワット選択中
+        exercises: [
+          makeExercise(id: 1, name: 'ベンチプレス'),
+          makeExercise(id: 2, name: 'スクワット'),
+        ],
+        disabledExerciseIds: {2}, // 自分が選んでいるが集合にも入っている想定
+      );
+
+      // 選択中の種目名が表示されている（消えていない）
+      expect(find.text('スクワット'), findsWidgets);
     });
   });
 }
