@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
 import '../shared/confirm_dialog.dart';
+import '../shared/one_rm_provider.dart';
 import '../workout_list/workout_list_notifier.dart';
 import 'workout_detail_provider.dart';
 
@@ -57,6 +58,7 @@ class WorkoutDetailScreen extends ConsumerWidget {
       await ref.read(workoutSetRepositoryProvider).deleteBySessionId(sessionId);
       await ref.read(workoutSessionRepositoryProvider).delete(sessionId);
       ref.invalidate(workoutListProvider);
+      ref.invalidate(exerciseOneRmProvider);
       if (context.mounted) context.go('/list');
     }
   }

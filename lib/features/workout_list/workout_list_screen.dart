@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../data/providers.dart';
 import '../shared/confirm_dialog.dart';
+import '../shared/one_rm_provider.dart';
 import '../shared/swipeable_list_item.dart';
 import 'workout_list_notifier.dart';
 
@@ -74,6 +75,7 @@ class WorkoutListScreen extends ConsumerWidget {
                               .read(workoutSetRepositoryProvider)
                               .deleteBySessionId(session.sessionId);
                           ref.invalidate(workoutListProvider);
+                          ref.invalidate(exerciseOneRmProvider);
                         },
                         child: ListTile(
                           title: Text(_formatDate(session.date)),

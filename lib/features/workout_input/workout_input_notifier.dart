@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
+import '../shared/one_rm_provider.dart';
 import '../shared/workout_form_notifier.dart';
 import '../workout_list/workout_list_notifier.dart';
 import 'workout_input_state.dart';
@@ -124,6 +125,7 @@ class WorkoutInputNotifier extends Notifier<WorkoutInputState>
       await setRepo.insertAll(sets);
 
       ref.invalidate(workoutListProvider);
+      ref.invalidate(exerciseOneRmProvider);
       // 入力状態をリセット
       state = WorkoutInputState();
     } catch (e, st) {

@@ -5,6 +5,7 @@ import 'package:workout_tracker/data/database/app_database.dart';
 import 'package:workout_tracker/features/exercise_master/exercise_master_notifier.dart';
 import 'package:workout_tracker/features/exercise_master/exercise_master_screen.dart';
 import 'package:workout_tracker/features/exercise_master/exercise_master_state.dart';
+import 'package:workout_tracker/features/shared/one_rm_provider.dart';
 
 void main() {
   /// テスト用ExerciseMasterを生成
@@ -28,6 +29,7 @@ void main() {
           exerciseMasterProvider.overrideWith(
             () => _FakeExerciseMasterNotifier(state),
           ),
+          exerciseOneRmProvider.overrideWith((ref) async => <int, double?>{}),
         ],
         child: const MaterialApp(home: ExerciseMasterScreen()),
       ),

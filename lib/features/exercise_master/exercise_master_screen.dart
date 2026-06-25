@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../shared/confirm_dialog.dart';
 import '../shared/swipeable_list_item.dart';
+import '../shared/workout_math.dart';
+import '../shared/one_rm_provider.dart';
 import 'exercise_master_notifier.dart';
 
 class ExerciseMasterScreen extends ConsumerWidget {
@@ -9,6 +11,8 @@ class ExerciseMasterScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final oneRmAsync = ref.watch(exerciseOneRmProvider);
+    final oneRmMap = oneRmAsync.valueOrNull ?? const <int, double?>{};
     final state = ref.watch(exerciseMasterProvider);
     final notifier = ref.read(exerciseMasterProvider.notifier);
 
@@ -48,6 +52,10 @@ class ExerciseMasterScreen extends ConsumerWidget {
                     leading: ReorderableDragStartListener(
                       index: index,
                       child: const Icon(Icons.drag_handle),
+                    ),
+                    trailing: Text(
+                      formatOneRm(oneRmMap[exercise.exerciseId]),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ),
                 );

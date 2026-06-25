@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
+import '../shared/one_rm_provider.dart';
 import '../shared/workout_form_notifier.dart';
 import '../workout_detail/workout_detail_provider.dart';
 import '../workout_input/workout_input_state.dart';
@@ -167,6 +168,7 @@ class WorkoutEditNotifier
 
       ref.invalidate(workoutListProvider);
       ref.invalidate(workoutDetailProvider(arg));
+      ref.invalidate(exerciseOneRmProvider);
 
       state = AsyncData(current.copyWith(isSaving: false));
       return true;
