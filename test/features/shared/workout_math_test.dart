@@ -37,4 +37,17 @@ void main() {
       expect(formatOneRm(100), '1RM 100.0 kg');
     });
   });
+  group('formatOneRmValue', () {
+    test('null は「--」', () {
+      expect(formatOneRmValue(null), '--');
+    });
+
+    test('値ありは小数第1位まで（単位なし）', () {
+      expect(formatOneRmValue(106.66), '106.7');
+    });
+
+    test('整数値も小数第1位表示', () {
+      expect(formatOneRmValue(100), '100.0');
+    });
+  });
 }

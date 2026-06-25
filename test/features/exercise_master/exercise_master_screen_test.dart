@@ -80,7 +80,7 @@ void main() {
     });
   });
 
-  testWidgets('5. 記録のある種目に1RMが表示される', (tester) async {
+  testWidgets('5. 記録のある種目に1RMバッジが表示される', (tester) async {
     await pumpScreen(
       tester,
       state: ExerciseMasterState(
@@ -88,23 +88,24 @@ void main() {
       ),
       oneRmMap: {1: 100.0},
     );
-    // FutureProviderの解決を待つ
     await tester.pump();
 
-    expect(find.text('1RM 100.0 kg'), findsOneWidget);
+    expect(find.text('1RM'), findsOneWidget); // 見出し
+    expect(find.text('100.0 kg'), findsOneWidget); // バッジ（結合）
   });
 
-  testWidgets('6. 記録のない種目は「1RM -- kg」と表示される', (tester) async {
+  testWidgets('6. 記録のない種目は「-- kg」バッジが表示される', (tester) async {
     await pumpScreen(
       tester,
       state: ExerciseMasterState(
         exercises: [makeExercise(id: 1, name: 'ベンチプレス')],
       ),
-      oneRmMap: const {}, // 記録なし
+      oneRmMap: const {},
     );
     await tester.pump();
 
-    expect(find.text('1RM -- kg'), findsOneWidget);
+    expect(find.text('1RM'), findsOneWidget); // 見出し
+    expect(find.text('-- kg'), findsOneWidget); // バッジ
   });
 }
 

@@ -6,6 +6,9 @@ import '../shared/workout_math.dart';
 import '../shared/one_rm_provider.dart';
 import 'exercise_master_notifier.dart';
 
+// 💡 レイアウト共通の定数
+const double _weightKgWidth = 80.0; // 1RMバッジの幅
+
 class ExerciseMasterScreen extends ConsumerWidget {
   const ExerciseMasterScreen({super.key});
 
@@ -22,44 +25,87 @@ class ExerciseMasterScreen extends ConsumerWidget {
           ? const Center(child: CircularProgressIndicator())
           : state.exercises.isEmpty
           ? const Center(child: Text('種目がありません'))
-          : ReorderableListView.builder(
-              itemCount: state.exercises.length,
-              onReorder: (oldIndex, newIndex) =>
-                  notifier.reorder(oldIndex, newIndex),
-              itemBuilder: (context, index) {
-                final exercise = state.exercises[index];
-                return SwipeableListItem(
-                  key: ValueKey(exercise.exerciseId),
-                  onDeleteConfirm: () => showConfirmDialog(
-                    context,
-                    title: '種目を削除',
-                    content: 'この種目を削除しますか？\n記録済みのデータには影響しません。',
+          : Column(
+              children: [
+                // リスト上部の「1RM」見出し
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        width: _weightKgWidth,
+                        child: Text(
+                          '1RM',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelMedium?.copyWith(color: Colors.grey),
+                        ),
+                      ),
+                    ],
                   ),
-                  onEdit: () => _showEditDialog(
-                    context,
-                    ref,
-                    exercise.exerciseId,
-                    exercise.name,
+                ),
+                Expanded(
+                  child: ReorderableListView.builder(
+                    itemCount: state.exercises.length,
+                    onReorder: (oldIndex, newIndex) =>
+                        notifier.reorder(oldIndex, newIndex),
+                    itemBuilder: (context, index) {
+                      final exercise = state.exercises[index];
+                      return SwipeableListItem(
+                        key: ValueKey(exercise.exerciseId),
+                        onDeleteConfirm: () => showConfirmDialog(
+                          context,
+                          title: '種目を削除',
+                          content: 'この種目を削除しますか？\n記録済みのデータには影響しません。',
+                        ),
+                        onEdit: () => _showEditDialog(
+                          context,
+                          ref,
+                          exercise.exerciseId,
+                          exercise.name,
+                        ),
+                        onDeleted: () async {
+                          await ref
+                              .read(exerciseMasterProvider.notifier)
+                              .deleteExercise(exercise.exerciseId);
+                        },
+                        child: Padding(
+                          key: ValueKey(exercise.exerciseId),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            children: [
+                              // ドラッグハンドル
+                              ReorderableDragStartListener(
+                                index: index,
+                                child: const Icon(
+                                  Icons.drag_handle,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // 種目名
+                              Expanded(
+                                child: Text(
+                                  exercise.name,
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // 1RMバッジ
+                              _OneRmBadge(value: oneRmMap[exercise.exerciseId]),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  onDeleted: () async {
-                    await ref
-                        .read(exerciseMasterProvider.notifier)
-                        .deleteExercise(exercise.exerciseId);
-                  },
-                  child: ListTile(
-                    key: ValueKey(exercise.exerciseId),
-                    title: Text(exercise.name),
-                    leading: ReorderableDragStartListener(
-                      index: index,
-                      child: const Icon(Icons.drag_handle),
-                    ),
-                    trailing: Text(
-                      formatOneRm(oneRmMap[exercise.exerciseId]),
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ),
-                );
-              },
+                ),
+              ],
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddDialog(context, ref),
@@ -132,5 +178,30 @@ class ExerciseMasterScreen extends ConsumerWidget {
           .read(exerciseMasterProvider.notifier)
           .updateName(exerciseId, name);
     }
+  }
+}
+
+/// 1RM表示バッジ（xx kg を角丸の箱で表示・固定幅・中央寄せ）
+/// 1RM表示バッジ（詳細画面の_Badgeを踏襲・固定幅80）
+class _OneRmBadge extends StatelessWidget {
+  const _OneRmBadge({required this.value});
+
+  final double? value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _weightKgWidth,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        '${formatOneRmValue(value)} kg',
+        style: Theme.of(context).textTheme.bodyMedium,
+        textAlign: TextAlign.center,
+      ),
+    );
   }
 }

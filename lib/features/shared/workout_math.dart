@@ -17,3 +17,10 @@ String formatOneRm(double? value) {
   if (value == null) return '1RM -- kg';
   return '1RM ${value.toStringAsFixed(1)} kg';
 }
+
+/// 推定1RMの数値部分だけを返す。null は「--」。
+/// 例：106.66 → "106.7"、null → "--"
+String formatOneRmValue(double? value) {
+  if (value == null) return '--';
+  return value.toStringAsFixed(1);
+}
