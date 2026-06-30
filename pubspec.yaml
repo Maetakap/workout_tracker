@@ -108,3 +108,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+  fonts:
+    - family: LINE Seed JP
+      fonts:
+        - asset: assets/fonts/LINESeedJP_A_TTF_Rg.ttf
+          weight: 400
+        - asset: assets/fonts/LINESeedJP_A_TTF_Bd.ttf
+          weight: 700

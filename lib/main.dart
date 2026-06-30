@@ -23,6 +23,12 @@ class WorkoutTrackerApp extends ConsumerWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
+        fontFamily: 'LINE Seed JP',
+        fontFamilyFallback: const [
+          'Noto Sans JP',
+          'Hiragino Sans',
+          'sans-serif',
+        ],
       ),
       routerConfig: router,
     );
