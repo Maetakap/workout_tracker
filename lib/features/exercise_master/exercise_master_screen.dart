@@ -131,7 +131,6 @@ class ExerciseMasterScreen extends ConsumerWidget {
         content: SingleChildScrollView(
           child: TextField(
             controller: controller,
-            autofocus: true,
             maxLength: 30,
             decoration: const InputDecoration(hintText: '種目名'),
           ),
