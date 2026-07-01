@@ -124,12 +124,17 @@ class ExerciseMasterScreen extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        // ① 画面端からの余白を確保（上に張り付きすぎるのを防ぐ）
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
         title: Text(title),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 30,
-          decoration: const InputDecoration(hintText: '種目名'),
+        // ② 中身をスクロール可能にする（縦が詰まっても救える）
+        content: SingleChildScrollView(
+          child: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLength: 30,
+            decoration: const InputDecoration(hintText: '種目名'),
+          ),
         ),
         actions: [
           TextButton(
