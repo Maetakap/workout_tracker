@@ -1,25 +1,25 @@
 import 'package:drift/drift.dart';
-import '../database/app_database.dart';
+import '../../database/app_database.dart';
+import '../interface/workout_session_repository.dart';
 
-class WorkoutSessionRepository {
+class DriftWorkoutSessionRepository implements WorkoutSessionRepository {
   final AppDatabase _db;
 
-  WorkoutSessionRepository(this._db);
+  DriftWorkoutSessionRepository(this._db);
 
-  /// 全セッションを新しい順に取得
+  @override
   Future<List<WorkoutSession>> findAll() {
     return (_db.select(
       _db.workoutSessions,
     )..orderBy([(t) => OrderingTerm.desc(t.date)])).get();
   }
 
-  /// 月フィルター＋種目フィルターで取得
+  @override
   Future<List<WorkoutSession>> findByFilter({
     DateTime? monthStart,
     DateTime? monthEnd,
     int? exerciseId,
   }) async {
-    // 種目フィルターがある場合は該当setが存在するsessionIdを先に取得
     Set<int>? filteredSessionIds;
     if (exerciseId != null) {
       final sets = await (_db.select(
@@ -49,14 +49,14 @@ class WorkoutSessionRepository {
     return query.get();
   }
 
-  /// IDで1件取得
+  @override
   Future<WorkoutSession?> findById(int sessionId) {
     return (_db.select(
       _db.workoutSessions,
     )..where((t) => t.sessionId.equals(sessionId))).getSingleOrNull();
   }
 
-  /// セッション追加（sessionIdを返す）
+  @override
   Future<int> insert({
     required DateTime date,
     required int focusLevel,
@@ -74,7 +74,7 @@ class WorkoutSessionRepository {
         );
   }
 
-  /// セッション更新
+  @override
   Future<void> update({
     required int sessionId,
     required DateTime date,
@@ -92,7 +92,7 @@ class WorkoutSessionRepository {
     );
   }
 
-  /// セッション削除
+  @override
   Future<void> delete(int sessionId) {
     return (_db.delete(
       _db.workoutSessions,

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:workout_tracker/data/database/app_database.dart';
-import 'package:workout_tracker/data/repositories/exercise_master_repository.dart';
+import 'package:workout_tracker/data/repositories/drift/drift_exercise_master_repository.dart';
+import 'package:workout_tracker/data/repositories/interface/exercise_master_repository.dart';
 
 import '../../helpers/test_database.dart';
 
@@ -10,7 +11,7 @@ void main() {
 
   setUp(() {
     db = createTestDatabase();
-    repo = ExerciseMasterRepository(db);
+    repo = DriftExerciseMasterRepository(db);
   });
 
   tearDown(() async {

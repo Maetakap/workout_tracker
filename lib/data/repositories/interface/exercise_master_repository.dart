@@ -1,4 +1,4 @@
-import '../database/app_database.dart';
+import '../../database/app_database.dart';
 
 /// 種目マスタRepositoryのインターフェース
 abstract interface class ExerciseMasterRepository {

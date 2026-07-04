@@ -2,11 +2,15 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'database/app_database.dart';
-import 'repositories/exercise_master_repository.dart';
-import 'repositories/drift_exercise_master_repository.dart';
-import 'repositories/supabase_exercise_master_repository.dart';
-import 'repositories/workout_session_repository.dart';
-import 'repositories/workout_set_repository.dart';
+import 'repositories/interface/exercise_master_repository.dart';
+import 'repositories/interface/workout_session_repository.dart';
+import 'repositories/interface/workout_set_repository.dart';
+import 'repositories/drift/drift_exercise_master_repository.dart';
+import 'repositories/drift/drift_workout_session_repository.dart';
+import 'repositories/drift/drift_workout_set_repository.dart';
+import 'repositories/supabase/supabase_exercise_master_repository.dart';
+import 'repositories/supabase/supabase_workout_session_repository.dart';
+import 'repositories/supabase/supabase_workout_set_repository.dart';
 
 /// DBインスタンス
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
@@ -28,9 +32,15 @@ final exerciseMasterRepositoryProvider = Provider<ExerciseMasterRepository>((
 final workoutSessionRepositoryProvider = Provider<WorkoutSessionRepository>((
   ref,
 ) {
-  return WorkoutSessionRepository(ref.watch(appDatabaseProvider));
+  if (kIsWeb) {
+    return SupabaseWorkoutSessionRepository(Supabase.instance.client);
+  }
+  return DriftWorkoutSessionRepository(ref.watch(appDatabaseProvider));
 });
 
 final workoutSetRepositoryProvider = Provider<WorkoutSetRepository>((ref) {
-  return WorkoutSetRepository(ref.watch(appDatabaseProvider));
+  if (kIsWeb) {
+    return SupabaseWorkoutSetRepository(Supabase.instance.client);
+  }
+  return DriftWorkoutSetRepository(ref.watch(appDatabaseProvider));
 });

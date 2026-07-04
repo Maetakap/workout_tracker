@@ -1,12 +1,13 @@
 import 'package:drift/drift.dart';
-import '../database/app_database.dart';
+import '../../database/app_database.dart';
+import '../interface/workout_set_repository.dart';
 
-class WorkoutSetRepository {
+class DriftWorkoutSetRepository implements WorkoutSetRepository {
   final AppDatabase _db;
 
-  WorkoutSetRepository(this._db);
+  DriftWorkoutSetRepository(this._db);
 
-  /// セッションに紐づく全セットをsetOrder順に取得
+  @override
   Future<List<WorkoutSet>> findBySessionId(int sessionId) {
     return (_db.select(_db.workoutSets)
           ..where((t) => t.sessionId.equals(sessionId))
@@ -14,7 +15,7 @@ class WorkoutSetRepository {
         .get();
   }
 
-  /// セットを一括insert（トランザクション）
+  @override
   Future<void> insertAll(List<WorkoutSetsCompanion> sets) async {
     await _db.transaction(() async {
       for (final set in sets) {
@@ -23,7 +24,7 @@ class WorkoutSetRepository {
     });
   }
 
-  /// セッションに紐づく全セットを削除してから一括insert（編集時に使用）
+  @override
   Future<void> replaceAll(
     int sessionId,
     List<WorkoutSetsCompanion> sets,
@@ -38,14 +39,14 @@ class WorkoutSetRepository {
     });
   }
 
-  /// セッションに紐づく全セットを削除（セッション削除時に使用）
+  @override
   Future<void> deleteBySessionId(int sessionId) {
     return (_db.delete(
       _db.workoutSets,
     )..where((t) => t.sessionId.equals(sessionId))).go();
   }
 
-  /// 全セットを取得（一覧画面の種目名表示・フィルター用）
+  @override
   Future<List<WorkoutSet>> findAll() {
     return _db.select(_db.workoutSets).get();
   }

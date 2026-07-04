@@ -2,9 +2,9 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:workout_tracker/data/database/app_database.dart';
 import 'package:workout_tracker/data/providers.dart';
-import 'package:workout_tracker/data/repositories/exercise_master_repository.dart';
-import 'package:workout_tracker/data/repositories/workout_session_repository.dart';
-import 'package:workout_tracker/data/repositories/workout_set_repository.dart';
+import 'package:workout_tracker/data/repositories/interface/exercise_master_repository.dart';
+import 'package:workout_tracker/data/repositories/interface/workout_session_repository.dart';
+import 'package:workout_tracker/data/repositories/interface/workout_set_repository.dart';
 import 'package:workout_tracker/features/workout_input/workout_input_notifier.dart';
 
 import '../../helpers/notifier_test_helpers.dart';

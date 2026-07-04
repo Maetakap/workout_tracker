@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:workout_tracker/data/database/app_database.dart';
 import 'package:workout_tracker/data/providers.dart';
-import 'package:workout_tracker/data/repositories/workout_set_repository.dart';
+import 'package:workout_tracker/data/repositories/interface/workout_set_repository.dart';
 import 'package:workout_tracker/features/shared/one_rm_provider.dart';
 import '../../helpers/notifier_test_helpers.dart';
 

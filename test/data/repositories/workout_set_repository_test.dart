@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:workout_tracker/data/database/app_database.dart';
-import 'package:workout_tracker/data/repositories/workout_session_repository.dart';
-import 'package:workout_tracker/data/repositories/workout_set_repository.dart';
+import 'package:workout_tracker/data/repositories/drift/drift_workout_session_repository.dart';
+import 'package:workout_tracker/data/repositories/drift/drift_workout_set_repository.dart';
+import 'package:workout_tracker/data/repositories/interface/workout_session_repository.dart';
+import 'package:workout_tracker/data/repositories/interface/workout_set_repository.dart';
 
 import '../../helpers/test_database.dart';
 
@@ -12,8 +14,8 @@ void main() {
 
   setUp(() {
     db = createTestDatabase();
-    setRepo = WorkoutSetRepository(db);
-    sessionRepo = WorkoutSessionRepository(db);
+    setRepo = DriftWorkoutSetRepository(db);
+    sessionRepo = DriftWorkoutSessionRepository(db);
   });
 
   tearDown(() async {

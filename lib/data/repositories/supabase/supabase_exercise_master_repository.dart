@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../database/app_database.dart';
-import 'exercise_master_repository.dart';
+import '../../database/app_database.dart';
+import '../interface/exercise_master_repository.dart';
 
 class SupabaseExerciseMasterRepository implements ExerciseMasterRepository {
   final SupabaseClient _client;
