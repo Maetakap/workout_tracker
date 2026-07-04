@@ -1,6 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'database/app_database.dart';
 import 'repositories/exercise_master_repository.dart';
+import 'repositories/drift_exercise_master_repository.dart';
+import 'repositories/supabase_exercise_master_repository.dart';
 import 'repositories/workout_session_repository.dart';
 import 'repositories/workout_set_repository.dart';
 
@@ -15,7 +19,10 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
 final exerciseMasterRepositoryProvider = Provider<ExerciseMasterRepository>((
   ref,
 ) {
-  return ExerciseMasterRepository(ref.watch(appDatabaseProvider));
+  if (kIsWeb) {
+    return SupabaseExerciseMasterRepository(Supabase.instance.client);
+  }
+  return DriftExerciseMasterRepository(ref.watch(appDatabaseProvider));
 });
 
 final workoutSessionRepositoryProvider = Provider<WorkoutSessionRepository>((
