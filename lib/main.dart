@@ -2,17 +2,19 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Web版のみSupabaseを初期化（AndroidはローカルDriftのため不要）
   if (kIsWeb) {
+    usePathUrlStrategy();
+
     await Supabase.initialize(
       url: const String.fromEnvironment('SUPABASE_URL'),
-      publishableKey: const String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY '),
+      publishableKey: const String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY'),
     );
   }
 
