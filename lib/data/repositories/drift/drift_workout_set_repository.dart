@@ -16,30 +16,6 @@ class DriftWorkoutSetRepository implements WorkoutSetRepository {
   }
 
   @override
-  Future<void> insertAll(List<WorkoutSetsCompanion> sets) async {
-    await _db.transaction(() async {
-      for (final set in sets) {
-        await _db.into(_db.workoutSets).insert(set);
-      }
-    });
-  }
-
-  @override
-  Future<void> replaceAll(
-    int sessionId,
-    List<WorkoutSetsCompanion> sets,
-  ) async {
-    await _db.transaction(() async {
-      await (_db.delete(
-        _db.workoutSets,
-      )..where((t) => t.sessionId.equals(sessionId))).go();
-      for (final set in sets) {
-        await _db.into(_db.workoutSets).insert(set);
-      }
-    });
-  }
-
-  @override
   Future<void> deleteBySessionId(int sessionId) {
     return (_db.delete(
       _db.workoutSets,

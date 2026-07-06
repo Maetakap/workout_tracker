@@ -40,15 +40,8 @@ class FakeSessionRepo implements WorkoutSessionRepository {
 
 /// セット保存を記録するフェイクRepository
 class FakeSetRepo implements WorkoutSetRepository {
-  List<WorkoutSetsCompanion> insertedSets = [];
-
   @override
   Future<List<WorkoutSet>> findAll() async => [];
-
-  @override
-  Future<void> insertAll(List<WorkoutSetsCompanion> sets) async {
-    insertedSets = sets;
-  }
 
   @override
   noSuchMethod(Invocation invocation) =>
