@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../database/app_database.dart';
+import '../interface/set_input.dart';
 import '../interface/workout_session_repository.dart';
 
 class SupabaseWorkoutSessionRepository implements WorkoutSessionRepository {
@@ -105,5 +106,44 @@ class SupabaseWorkoutSessionRepository implements WorkoutSessionRepository {
   @override
   Future<void> delete(int sessionId) async {
     await _client.from('workout_sessions').delete().eq('sessionId', sessionId);
+  }
+
+  @override
+  Future<int> createSessionWithSets({
+    required DateTime date,
+    required int focusLevel,
+    String? memo,
+    required List<SetInput> sets,
+  }) async {
+    final sessionId = await _client.rpc(
+      'create_session_with_sets',
+      params: {
+        'p_date': date.toIso8601String(),
+        'p_focus_level': focusLevel,
+        'p_memo': memo,
+        'p_sets': sets.map((s) => s.toJson()).toList(),
+      },
+    );
+    return sessionId as int;
+  }
+
+  @override
+  Future<void> updateSessionWithSets({
+    required int sessionId,
+    required DateTime date,
+    required int focusLevel,
+    String? memo,
+    required List<SetInput> sets,
+  }) async {
+    await _client.rpc(
+      'update_session_with_sets',
+      params: {
+        'p_session_id': sessionId,
+        'p_date': date.toIso8601String(),
+        'p_focus_level': focusLevel,
+        'p_memo': memo,
+        'p_sets': sets.map((s) => s.toJson()).toList(),
+      },
+    );
   }
 }

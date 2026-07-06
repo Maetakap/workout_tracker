@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
 import '../shared/one_rm_provider.dart';
+import '../shared/set_input_builder.dart';
 import '../shared/workout_form_notifier.dart';
 import '../workout_list/workout_list_notifier.dart';
 import 'workout_input_state.dart';
@@ -95,38 +95,16 @@ class WorkoutInputNotifier extends Notifier<WorkoutInputState>
 
     try {
       final sessionRepo = ref.read(workoutSessionRepositoryProvider);
-      final setRepo = ref.read(workoutSetRepositoryProvider);
 
-      // セッション保存
-      final sessionId = await sessionRepo.insert(
+      await sessionRepo.createSessionWithSets(
         date: DateTime.now(),
         focusLevel: state.focusLevel!,
         memo: state.memo.isEmpty ? null : state.memo,
+        sets: buildSetInputs(state.exerciseCards),
       );
-
-      // 全セットをsetOrderの通し番号で保存
-      int setOrder = 0;
-      final sets = <WorkoutSetsCompanion>[];
-      for (final card in state.exerciseCards) {
-        for (final set in card.sets) {
-          sets.add(
-            WorkoutSetsCompanion.insert(
-              sessionId: sessionId,
-              exerciseId: card.exerciseId!,
-              setOrder: setOrder++,
-              weightKg: set.weightKg!,
-              reps: set.reps!,
-              rir: set.rir!,
-              createdAt: DateTime.now(),
-            ),
-          );
-        }
-      }
-      await setRepo.insertAll(sets);
 
       ref.invalidate(workoutListProvider);
       ref.invalidate(exerciseOneRmProvider);
-      // 入力状態をリセット
       state = WorkoutInputState();
     } catch (e, st) {
       debugPrint('saveSession error: $e');

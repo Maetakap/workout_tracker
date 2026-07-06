@@ -1,8 +1,8 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:workout_tracker/data/database/app_database.dart';
 import 'package:workout_tracker/data/providers.dart';
 import 'package:workout_tracker/data/repositories/interface/exercise_master_repository.dart';
+import 'package:workout_tracker/data/repositories/interface/set_input.dart';
 import 'package:workout_tracker/data/repositories/interface/workout_session_repository.dart';
 import 'package:workout_tracker/data/repositories/interface/workout_set_repository.dart';
 import 'package:workout_tracker/features/workout_input/workout_input_notifier.dart';
@@ -11,22 +11,25 @@ import '../../helpers/notifier_test_helpers.dart';
 
 /// セッション保存を記録するフェイクRepository
 class FakeSessionRepo implements WorkoutSessionRepository {
-  bool throwOnInsert = false;
-  int? insertedFocusLevel;
-  String? insertedMemo;
+  bool throwOnSave = false;
+  int? savedFocusLevel;
+  String? savedMemo;
+  List<SetInput> savedSets = [];
 
   @override
   Future<List<WorkoutSession>> findAll() async => [];
 
   @override
-  Future<int> insert({
+  Future<int> createSessionWithSets({
     required DateTime date,
     required int focusLevel,
     String? memo,
+    required List<SetInput> sets,
   }) async {
-    if (throwOnInsert) throw Exception('DB error');
-    insertedFocusLevel = focusLevel;
-    insertedMemo = memo;
+    if (throwOnSave) throw Exception('DB error');
+    savedFocusLevel = focusLevel;
+    savedMemo = memo;
+    savedSets = sets;
     return 1; // sessionId
   }
 
@@ -188,9 +191,9 @@ void main() {
       await settle();
 
       // Repositoryに正しい値が渡る
-      expect(fakeSessionRepo.insertedFocusLevel, 3);
-      expect(fakeSessionRepo.insertedMemo, 'がんばった');
-      expect(fakeSetRepo.insertedSets.length, 1);
+      expect(fakeSessionRepo.savedFocusLevel, 3);
+      expect(fakeSessionRepo.savedMemo, 'がんばった');
+      expect(fakeSessionRepo.savedSets.length, 1);
 
       // 保存後リセット
       final state = container.read(workoutInputProvider);
@@ -201,7 +204,6 @@ void main() {
     test('保存したセットにsetOrderが通し番号で振られる', () async {
       final container = createTestContainer();
       final notifier = container.read(workoutInputProvider.notifier);
-      // 1種目2セット
       notifier.setExerciseId(0, 1);
       notifier.updateWeight(0, 0, 60.0);
       notifier.updateReps(0, 0, 10);
@@ -214,16 +216,16 @@ void main() {
       await notifier.saveSession();
       await settle();
 
-      final sets = fakeSetRepo.insertedSets;
+      final sets = fakeSessionRepo.savedSets;
       expect(sets.length, 2);
-      expect((sets[0].setOrder as Value).value, 0);
-      expect((sets[1].setOrder as Value).value, 1);
+      expect(sets[0].setOrder, 0);
+      expect(sets[1].setOrder, 1);
     });
 
     test('Repository失敗時はisSavingがfalseに戻る', () async {
       final container = createTestContainer();
       fillValidInput(container);
-      fakeSessionRepo.throwOnInsert = true;
+      fakeSessionRepo.throwOnSave = true;
 
       try {
         await container.read(workoutInputProvider.notifier).saveSession();

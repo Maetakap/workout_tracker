@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
 import '../shared/one_rm_provider.dart';
+import '../shared/set_input_builder.dart';
 import '../shared/workout_form_notifier.dart';
 import '../workout_detail/workout_detail_provider.dart';
 import '../workout_input/workout_input_state.dart';
@@ -138,33 +139,15 @@ class WorkoutEditNotifier
 
     try {
       final sessionRepo = ref.read(workoutSessionRepositoryProvider);
-      final setRepo = ref.read(workoutSetRepositoryProvider);
 
-      await sessionRepo.update(
+      // セット群をSetInputで組み立て
+      await sessionRepo.updateSessionWithSets(
         sessionId: arg,
         date: current.session!.date,
         focusLevel: current.focusLevel!,
         memo: current.memo.isEmpty ? null : current.memo,
+        sets: buildSetInputs(current.exerciseCards),
       );
-
-      int setOrder = 0;
-      final sets = <WorkoutSetsCompanion>[];
-      for (final card in current.exerciseCards) {
-        for (final set in card.sets) {
-          sets.add(
-            WorkoutSetsCompanion.insert(
-              sessionId: arg,
-              exerciseId: card.exerciseId!,
-              setOrder: setOrder++,
-              weightKg: set.weightKg!,
-              reps: set.reps!,
-              rir: set.rir!,
-              createdAt: DateTime.now(),
-            ),
-          );
-        }
-      }
-      await setRepo.replaceAll(arg, sets);
 
       ref.invalidate(workoutListProvider);
       ref.invalidate(workoutDetailProvider(arg));
