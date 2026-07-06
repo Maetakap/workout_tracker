@@ -2,15 +2,15 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/router.dart';
+import 'platform/url_strategy.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (kIsWeb) {
-    usePathUrlStrategy();
+    usePathUrlStrategyIfWeb();
 
     await Supabase.initialize(
       url: const String.fromEnvironment('SUPABASE_URL'),
