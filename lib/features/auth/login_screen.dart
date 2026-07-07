@@ -25,7 +25,7 @@ class LoginScreen extends StatelessWidget {
               onPressed: () async {
                 await Supabase.instance.client.auth.signInWithOAuth(
                   OAuthProvider.google,
-                  redirectTo: kIsWeb ? Uri.base.toString() : null,
+                  redirectTo: kIsWeb ? _resolveRedirectTo() : null,
                 );
               },
             ),
@@ -34,4 +34,14 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+String _resolveRedirectTo() {
+  final base = Uri.base;
+  if (base.host == 'maetakap.github.io') {
+    // 本番：ベースパス固定
+    return '${base.origin}/workout_tracker/';
+  }
+  // ローカル開発：オリジンのみ
+  return base.origin;
 }
