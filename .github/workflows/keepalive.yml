@@ -1,0 +1,17 @@
+name: Supabase Keepalive
+
+on:
+  schedule:
+    - cron: "0 0 * * 0,3" # 毎週日曜・水曜 UTC 0時（週2回）
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase to prevent auto-pause
+        run: |
+          curl -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/keepalive_pings?id=eq.1" \
+            -H "apikey: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"pingedAt\": \"$(date -u +%Y-%m-%dT%H:%M:%S)Z\"}"
