@@ -34,7 +34,7 @@ jobs:
         run: flutter test
 
       - name: Build web
-        run: flutter build web --release --base-href /workout_tracker/
+        run: flutter build web --release --base-href /workout_tracker/ --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
 
       - name: Create 404.html for SPA routing
         run: cp build/web/index.html build/web/404.html
