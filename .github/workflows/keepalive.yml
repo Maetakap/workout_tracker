@@ -11,7 +11,8 @@ jobs:
     steps:
       - name: Ping Supabase to prevent auto-pause
         run: |
-          curl -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/keepalive_pings?id=eq.1" \
+          curl -i -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/keepalive_pings?id=eq.1" \
             -H "apikey: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}" \
             -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
             -d "{\"pingedAt\": \"$(date -u +%Y-%m-%dT%H:%M:%S)Z\"}"
