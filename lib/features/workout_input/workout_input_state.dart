@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../shared/workout_math.dart';
+
 class SetRowState {
   final String id;
   final double? weightKg;
@@ -35,6 +37,9 @@ class ExerciseCardState {
       sets: sets ?? this.sets,
     );
   }
+
+  double totalVolume() =>
+      sumVolume(sets.map((s) => (s.weightKg ?? 0, s.reps ?? 0)));
 }
 
 class WorkoutInputState {

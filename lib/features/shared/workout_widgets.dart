@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:workout_tracker/features/shared/workout_math.dart';
 import '../../data/database/app_database.dart';
 import '../workout_input/workout_input_state.dart';
 import 'workout_form_notifier.dart';
@@ -358,6 +359,25 @@ class ExerciseCard extends ConsumerWidget {
                 notifier: notifier,
               );
             }),
+            // ExerciseCard ウィジェット内の合計ボリューム表示部分
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 8),
+                child: Text.rich(
+                  TextSpan(
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    children: [
+                      const TextSpan(text: '合計ボリューム: '),
+                      TextSpan(
+                        text: formatVolume(card.totalVolume()),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
