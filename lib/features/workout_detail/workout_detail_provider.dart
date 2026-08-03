@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
 import '../exercise_master/exercise_master_notifier.dart';
+import '../shared/workout_math.dart';
 
 /// 1種目分のセット群をまとめたデータクラス
 class ExerciseSetGroup {
@@ -9,6 +10,8 @@ class ExerciseSetGroup {
   final List<WorkoutSet> sets;
 
   const ExerciseSetGroup({required this.exerciseName, required this.sets});
+
+  double totalVolume() => sumVolume(sets.map((s) => (s.weightKg, s.reps)));
 }
 
 /// 詳細画面で使うデータをまとめたデータクラス

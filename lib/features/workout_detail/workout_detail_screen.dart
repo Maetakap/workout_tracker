@@ -5,6 +5,7 @@ import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
 import '../shared/confirm_dialog.dart';
 import '../shared/one_rm_provider.dart';
+import '../shared/workout_math.dart';
 import '../workout_list/workout_list_notifier.dart';
 import 'workout_detail_provider.dart';
 
@@ -184,6 +185,28 @@ class _ExerciseSection extends StatelessWidget {
           final set = entry.value;
           return _SetRow(index: i, set: set);
         }),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: Text.rich(
+              TextSpan(
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium, // 全体のデフォルトスタイル（通常の太さ）
+                children: [
+                  const TextSpan(text: '合計ボリューム: '),
+                  TextSpan(
+                    text: formatVolume(group.totalVolume()),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold, // この部分だけ太字にする
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

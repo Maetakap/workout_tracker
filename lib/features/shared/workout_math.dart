@@ -24,3 +24,11 @@ String formatOneRmValue(double? value) {
   if (value == null) return '--';
   return value.toStringAsFixed(1);
 }
+
+double calculateVolume(double weightKg, int reps) => weightKg * reps;
+
+double sumVolume(Iterable<(double, int)> entries) {
+  return entries.fold(0.0, (sum, e) => sum + calculateVolume(e.$1, e.$2));
+}
+
+String formatVolume(double value) => '${value.toStringAsFixed(1)} kg';

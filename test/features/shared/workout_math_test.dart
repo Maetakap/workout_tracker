@@ -50,4 +50,27 @@ void main() {
       expect(formatOneRmValue(100), '100.0');
     });
   });
+
+  group('calculateVolume', () {
+    test('重量×回数を返す', () {
+      expect(calculateVolume(60, 10), 600.0);
+    });
+  });
+
+  group('sumVolume', () {
+    test('複数セットの合計を計算する', () {
+      final entries = [(60.0, 10), (65.0, 8)];
+      expect(sumVolume(entries), 60.0 * 10 + 65.0 * 8);
+    });
+
+    test('空リストなら0を返す', () {
+      expect(sumVolume(const <(double, int)>[]), 0.0);
+    });
+  });
+
+  group('formatVolume', () {
+    test('小数第1位＋kg単位でフォーマットする', () {
+      expect(formatVolume(600), '600.0 kg');
+    });
+  });
 }
