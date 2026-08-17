@@ -18,10 +18,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: "3.47.x" # ★手元の `flutter --version` で出たメジャー・マイナーバージョンを指定（例: '3.29.x' や '3.27.x'）
           channel: stable
 
       - name: Get dependencies
