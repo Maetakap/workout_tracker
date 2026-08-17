@@ -137,8 +137,8 @@ void main() {
       await notifier.addExercise('ベンチプレス');
       await notifier.addExercise('スクワット');
 
-      // 先頭(ベンチプレス)を末尾へ移動
-      await notifier.reorder(0, 2);
+      // 先頭(ベンチプレス)を末尾(インデックス1)へ移動
+      await notifier.reorder(0, 1);
 
       expect(
         container.read(exerciseMasterProvider).exercises.first.name,

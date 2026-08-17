@@ -49,7 +49,7 @@ class ExerciseMasterScreen extends ConsumerWidget {
                 Expanded(
                   child: ReorderableListView.builder(
                     itemCount: state.exercises.length,
-                    onReorder: (oldIndex, newIndex) =>
+                    onReorderItem: (oldIndex, newIndex) =>
                         notifier.reorder(oldIndex, newIndex),
                     itemBuilder: (context, index) {
                       final exercise = state.exercises[index];

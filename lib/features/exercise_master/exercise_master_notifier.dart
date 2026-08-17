@@ -37,7 +37,6 @@ class ExerciseMasterNotifier extends Notifier<ExerciseMasterState> {
 
   Future<void> reorder(int oldIndex, int newIndex) async {
     final list = [...state.exercises];
-    if (newIndex > oldIndex) newIndex--;
     final item = list.removeAt(oldIndex);
     list.insert(newIndex, item);
     state = state.copyWith(exercises: list);
