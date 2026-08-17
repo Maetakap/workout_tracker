@@ -222,7 +222,7 @@ void main() {
         exercises: [makeExercise(id: 1, name: 'ベンチプレス')],
       );
 
-      await tester.tap(find.byIcon(Icons.calendar_today));
+      await tester.tap(find.byIcon(Icons.edit_calendar));
       await tester.pumpAndSettle();
 
       expect(find.byType(DatePickerDialog), findsOneWidget);
