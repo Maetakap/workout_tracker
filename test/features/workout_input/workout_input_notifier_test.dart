@@ -162,6 +162,15 @@ void main() {
       container.read(workoutInputProvider.notifier).setMemo('テストメモ');
       expect(container.read(workoutInputProvider).memo, 'テストメモ');
     });
+
+    test('setDate()でdateが更新され時刻が00:00に正規化される', () {
+      final container = createTestContainer();
+      final notifier = container.read(workoutInputProvider.notifier);
+      final picked = DateTime(2026, 7, 20, 15, 30); // 時刻付きで渡す
+      notifier.setDate(picked);
+      final state = container.read(workoutInputProvider);
+      expect(state.date, DateTime(2026, 7, 20));
+    });
   });
 
   group('WorkoutInputNotifier saveSession', () {

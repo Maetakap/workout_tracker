@@ -6,6 +6,7 @@ class WorkoutEditState {
   final List<ExerciseCardState> exerciseCards;
   final int? focusLevel;
   final String memo;
+  final DateTime? date;
   final bool isSaving;
 
   const WorkoutEditState({
@@ -13,6 +14,7 @@ class WorkoutEditState {
     this.exerciseCards = const [],
     this.focusLevel,
     this.memo = '',
+    this.date,
     this.isSaving = false,
   });
 
@@ -36,6 +38,7 @@ class WorkoutEditState {
     List<ExerciseCardState>? exerciseCards,
     int? focusLevel,
     String? memo,
+    DateTime? date,
     bool? isSaving,
   }) {
     return WorkoutEditState(
@@ -43,6 +46,7 @@ class WorkoutEditState {
       exerciseCards: exerciseCards ?? this.exerciseCards,
       focusLevel: focusLevel ?? this.focusLevel,
       memo: memo ?? this.memo,
+      date: date ?? this.date,
       isSaving: isSaving ?? this.isSaving,
     );
   }

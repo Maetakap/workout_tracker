@@ -42,18 +42,26 @@ class ExerciseCardState {
       sumVolume(sets.map((s) => (s.weightKg ?? 0, s.reps ?? 0)));
 }
 
+DateTime _today() {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+}
+
 class WorkoutInputState {
   final List<ExerciseCardState> exerciseCards;
   final int? focusLevel;
   final String memo;
+  final DateTime date;
   final bool isSaving;
 
   WorkoutInputState({
     List<ExerciseCardState>? exerciseCards,
     this.focusLevel,
     this.memo = '',
+    DateTime? date,
     this.isSaving = false,
-  }) : exerciseCards = exerciseCards ?? [ExerciseCardState()];
+  }) : exerciseCards = exerciseCards ?? [ExerciseCardState()],
+       date = date ?? _today();
 
   bool canSave() {
     if (focusLevel == null) return false;
@@ -74,6 +82,7 @@ class WorkoutInputState {
     List<ExerciseCardState>? exerciseCards,
     int? focusLevel,
     String? memo,
+    DateTime? date,
     bool? isSaving,
     bool clearFocusLevel = false,
   }) {
@@ -81,6 +90,7 @@ class WorkoutInputState {
       exerciseCards: exerciseCards ?? this.exerciseCards,
       focusLevel: clearFocusLevel ? null : focusLevel ?? this.focusLevel,
       memo: memo ?? this.memo,
+      date: date ?? this.date,
       isSaving: isSaving ?? this.isSaving,
     );
   }

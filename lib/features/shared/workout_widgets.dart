@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:workout_tracker/features/shared/workout_math.dart';
 import '../../data/database/app_database.dart';
 import '../workout_input/workout_input_state.dart';
+import 'date_format.dart';
 import 'workout_form_notifier.dart';
 
 /// 保存ボタン固定バー（入力・編集画面で共通利用）
@@ -436,6 +437,45 @@ class _MemoFieldState extends State<MemoField> {
         border: OutlineInputBorder(),
       ),
       onChanged: widget.onChanged,
+    );
+  }
+}
+
+/// 記録日入力欄（入力・編集画面で共通利用）
+class DateField extends StatelessWidget {
+  const DateField({super.key, required this.value, required this.onChanged});
+
+  final DateTime value;
+  final ValueChanged<DateTime> onChanged;
+
+  Future<void> _pickDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: value,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) onChanged(picked);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => _pickDate(context),
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Text(
+              formatSessionDate(value),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.edit_calendar, size: 18, color: Colors.grey),
+          ],
+        ),
+      ),
     );
   }
 }

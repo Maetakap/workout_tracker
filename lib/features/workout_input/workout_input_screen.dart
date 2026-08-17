@@ -21,6 +21,8 @@ class WorkoutInputScreen extends ConsumerWidget {
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                DateField(value: state.date, onChanged: notifier.setDate),
+                const SizedBox(height: 16),
                 ...state.exerciseCards.asMap().entries.map((entry) {
                   return ExerciseCard(
                     key: ValueKey(entry.value.id),

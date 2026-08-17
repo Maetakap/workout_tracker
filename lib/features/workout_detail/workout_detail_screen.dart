@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:workout_tracker/features/shared/date_format.dart'
+    show formatSessionDate;
 import '../../data/database/app_database.dart';
 import '../../data/providers.dart';
 import '../shared/confirm_dialog.dart';
@@ -81,7 +83,7 @@ class _DetailBody extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              _formatDate(session.date),
+              formatSessionDate(session.date),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             Row(
@@ -119,12 +121,6 @@ class _DetailBody extends StatelessWidget {
         ],
       ],
     );
-  }
-
-  String _formatDate(DateTime date) {
-    const weekdays = ['月', '火', '水', '木', '金', '土', '日'];
-    final weekday = weekdays[date.weekday - 1];
-    return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')} ($weekday)';
   }
 }
 

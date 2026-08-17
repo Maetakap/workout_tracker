@@ -139,4 +139,47 @@ void main() {
       expect(copied.id, original.id);
     });
   });
+  group('WorkoutInputState date', () {
+    test('デフォルトは今日の日付（時刻00:00）', () {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final state = WorkoutInputState();
+      expect(state.date, today);
+    });
+
+    test('copyWith()でdateのみ変更し他は保持', () {
+      final original = WorkoutInputState(focusLevel: 3, memo: 'test');
+      final newDate = DateTime(2026, 6, 15);
+      final copied = original.copyWith(date: newDate);
+      expect(copied.date, newDate);
+      expect(copied.focusLevel, 3);
+      expect(copied.memo, 'test');
+    });
+  });
+
+  group('ExerciseCardState.totalVolume()', () {
+    test('複数セットの合計ボリュームを返す', () {
+      final card = ExerciseCardState(
+        exerciseId: 1,
+        sets: [
+          SetRowState(weightKg: 60.0, reps: 10, rir: 2),
+          SetRowState(weightKg: 65.0, reps: 8, rir: 1),
+        ],
+      );
+      expect(card.totalVolume(), 60.0 * 10 + 65.0 * 8);
+    });
+
+    test('未入力のセットは重量・回数とも0として扱う', () {
+      final card = ExerciseCardState(
+        exerciseId: 1,
+        sets: [SetRowState(weightKg: 60.0, reps: 10, rir: 2), SetRowState()],
+      );
+      expect(card.totalVolume(), 600.0);
+    });
+
+    test('デフォルト状態（空セット1件）は0を返す', () {
+      final card = ExerciseCardState();
+      expect(card.totalVolume(), 0.0);
+    });
+  });
 }

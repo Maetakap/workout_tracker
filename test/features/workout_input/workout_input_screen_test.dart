@@ -9,6 +9,8 @@ import 'package:workout_tracker/features/workout_input/workout_input_notifier.da
 import 'package:workout_tracker/features/workout_input/workout_input_screen.dart';
 import 'package:workout_tracker/features/workout_input/workout_input_state.dart';
 
+import '../../helpers/widget_test_helpers.dart';
+
 void main() {
   ExerciseMaster makeExercise({required int id, required String name}) {
     return ExerciseMaster(
@@ -25,6 +27,8 @@ void main() {
     required WorkoutInputState inputState,
     required List<ExerciseMaster> exercises,
   }) async {
+    useTallTestViewport(tester);
+
     final router = GoRouter(
       initialLocation: '/input',
       routes: [
@@ -34,22 +38,20 @@ void main() {
       ],
     );
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          workoutInputProvider.overrideWith(
-            () => _FakeWorkoutInputNotifier(inputState),
+    await pumpRoutedScreen(
+      tester,
+      router: router,
+      overrides: [
+        workoutInputProvider.overrideWith(
+          () => _FakeWorkoutInputNotifier(inputState),
+        ),
+        exerciseMasterProvider.overrideWith(
+          () => _FakeExerciseMasterNotifier(
+            ExerciseMasterState(exercises: exercises),
           ),
-          exerciseMasterProvider.overrideWith(
-            () => _FakeExerciseMasterNotifier(
-              ExerciseMasterState(exercises: exercises),
-            ),
-          ),
-        ],
-        child: MaterialApp.router(routerConfig: router),
-      ),
+        ),
+      ],
     );
-    await tester.pump();
   }
 
   group('WorkoutInputScreen', () {

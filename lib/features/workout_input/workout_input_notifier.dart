@@ -89,6 +89,11 @@ class WorkoutInputNotifier extends Notifier<WorkoutInputState>
     state = state.copyWith(memo: memo);
   }
 
+  void setDate(DateTime date) {
+    final normalized = DateTime(date.year, date.month, date.day);
+    state = state.copyWith(date: normalized);
+  }
+
   Future<void> saveSession() async {
     if (!state.canSave()) return;
     state = state.copyWith(isSaving: true);
@@ -97,7 +102,7 @@ class WorkoutInputNotifier extends Notifier<WorkoutInputState>
       final sessionRepo = ref.read(workoutSessionRepositoryProvider);
 
       await sessionRepo.createSessionWithSets(
-        date: DateTime.now(),
+        date: state.date,
         focusLevel: state.focusLevel!,
         memo: state.memo.isEmpty ? null : state.memo,
         sets: buildSetInputs(state.exerciseCards),

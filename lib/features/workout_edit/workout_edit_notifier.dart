@@ -43,6 +43,7 @@ class WorkoutEditNotifier
       exerciseCards: exerciseCards,
       focusLevel: session.focusLevel,
       memo: session.memo ?? '',
+      date: session.date,
     );
   }
 
@@ -122,6 +123,12 @@ class WorkoutEditNotifier
     state = AsyncData(current.copyWith(exerciseCards: cards));
   }
 
+  void setDate(DateTime date) {
+    final current = state.requireValue;
+    final normalized = DateTime(date.year, date.month, date.day);
+    state = AsyncData(current.copyWith(date: normalized));
+  }
+
   void setFocusLevel(int level) {
     final current = state.requireValue;
     state = AsyncData(current.copyWith(focusLevel: level));
@@ -143,7 +150,7 @@ class WorkoutEditNotifier
       // セット群をSetInputで組み立て
       await sessionRepo.updateSessionWithSets(
         sessionId: arg,
-        date: current.session!.date,
+        date: current.date!,
         focusLevel: current.focusLevel!,
         memo: current.memo.isEmpty ? null : current.memo,
         sets: buildSetInputs(current.exerciseCards),
