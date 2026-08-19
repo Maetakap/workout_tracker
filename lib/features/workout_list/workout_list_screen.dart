@@ -107,14 +107,14 @@ class WorkoutListScreen extends ConsumerWidget {
                                       const Text('：'), // コロンは省略せず固定表示
                                       const SizedBox(width: 8),
                                       SizedBox(
-                                        width: 110,
+                                        width: 100,
                                         child: Text(
                                           formatVolume(volume),
                                           textAlign: TextAlign.right,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                           ),
-                                          softWrap: false,
+                                          softWrap: true,
                                         ),
                                       ),
                                     ],
