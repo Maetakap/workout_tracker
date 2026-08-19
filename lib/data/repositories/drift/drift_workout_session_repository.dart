@@ -16,41 +16,6 @@ class DriftWorkoutSessionRepository implements WorkoutSessionRepository {
   }
 
   @override
-  Future<List<WorkoutSession>> findByFilter({
-    DateTime? monthStart,
-    DateTime? monthEnd,
-    int? exerciseId,
-  }) async {
-    Set<int>? filteredSessionIds;
-    if (exerciseId != null) {
-      final sets = await (_db.select(
-        _db.workoutSets,
-      )..where((t) => t.exerciseId.equals(exerciseId))).get();
-      filteredSessionIds = sets.map((s) => s.sessionId).toSet();
-      if (filteredSessionIds.isEmpty) return [];
-    }
-
-    final query = _db.select(_db.workoutSessions)
-      ..orderBy([(t) => OrderingTerm.desc(t.date)]);
-
-    query.where((t) {
-      Expression<bool> cond = const Constant(true);
-      if (monthStart != null) {
-        cond = cond & t.date.isBiggerOrEqualValue(monthStart);
-      }
-      if (monthEnd != null) {
-        cond = cond & t.date.isSmallerThanValue(monthEnd);
-      }
-      if (filteredSessionIds != null) {
-        cond = cond & t.sessionId.isIn(filteredSessionIds.toList());
-      }
-      return cond;
-    });
-
-    return query.get();
-  }
-
-  @override
   Future<WorkoutSession?> findById(int sessionId) {
     return (_db.select(
       _db.workoutSessions,

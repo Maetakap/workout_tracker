@@ -28,36 +28,6 @@ class SupabaseWorkoutSessionRepository implements WorkoutSessionRepository {
   }
 
   @override
-  Future<List<WorkoutSession>> findByFilter({
-    DateTime? monthStart,
-    DateTime? monthEnd,
-    int? exerciseId,
-  }) async {
-    Set<int>? filteredSessionIds;
-    if (exerciseId != null) {
-      final sets = await _client
-          .from('workout_sets')
-          .select('sessionId')
-          .eq('exerciseId', exerciseId);
-      filteredSessionIds = sets.map((s) => s['sessionId'] as int).toSet();
-      if (filteredSessionIds.isEmpty) return [];
-    }
-
-    var query = _client.from('workout_sessions').select();
-    if (monthStart != null) {
-      query = query.gte('date', monthStart.toIso8601String());
-    }
-    if (monthEnd != null) {
-      query = query.lt('date', monthEnd.toIso8601String());
-    }
-    if (filteredSessionIds != null) {
-      query = query.inFilter('sessionId', filteredSessionIds.toList());
-    }
-    final rows = await query.order('date', ascending: false);
-    return rows.map(_fromMap).toList();
-  }
-
-  @override
   Future<WorkoutSession?> findById(int sessionId) async {
     final row = await _client
         .from('workout_sessions')

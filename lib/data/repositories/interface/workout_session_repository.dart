@@ -3,11 +3,6 @@ import 'set_input.dart';
 
 abstract interface class WorkoutSessionRepository {
   Future<List<WorkoutSession>> findAll();
-  Future<List<WorkoutSession>> findByFilter({
-    DateTime? monthStart,
-    DateTime? monthEnd,
-    int? exerciseId,
-  });
   Future<WorkoutSession?> findById(int sessionId);
 
   Future<int> insert({
