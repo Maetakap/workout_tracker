@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../shared/confirm_dialog.dart';
 import '../shared/swipeable_list_item.dart';
 import '../shared/workout_math.dart';
@@ -38,9 +39,8 @@ class ExerciseMasterScreen extends ConsumerWidget {
                         child: Text(
                           '1RM',
                           textAlign: TextAlign.center,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.labelMedium?.copyWith(color: Colors.grey),
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(color: Colors.grey),
                         ),
                       ),
                     ],
@@ -57,6 +57,7 @@ class ExerciseMasterScreen extends ConsumerWidget {
                       return Column(
                         key: itemKey, // ReorderableListView 用の Key
                         children: [
+                          if (index > 0) const Divider(height: 1),
                           SwipeableListItem(
                             key: itemKey,
                             onDeleteConfirm: () => showConfirmDialog(
@@ -95,9 +96,9 @@ class ExerciseMasterScreen extends ConsumerWidget {
                                   Expanded(
                                     child: Text(
                                       exercise.name,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -109,8 +110,6 @@ class ExerciseMasterScreen extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          // 行間の横線
-                          const Divider(height: 1),
                         ],
                       );
                     },
