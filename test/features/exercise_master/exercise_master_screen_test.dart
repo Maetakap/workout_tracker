@@ -78,34 +78,33 @@ void main() {
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
-  });
+    testWidgets('5. 記録のある種目に1RMバッジが表示される', (tester) async {
+      await pumpScreen(
+        tester,
+        state: ExerciseMasterState(
+          exercises: [makeExercise(id: 1, name: 'ベンチプレス')],
+        ),
+        oneRmMap: {1: 100.0},
+      );
+      await tester.pump();
 
-  testWidgets('5. 記録のある種目に1RMバッジが表示される', (tester) async {
-    await pumpScreen(
-      tester,
-      state: ExerciseMasterState(
-        exercises: [makeExercise(id: 1, name: 'ベンチプレス')],
-      ),
-      oneRmMap: {1: 100.0},
-    );
-    await tester.pump();
+      expect(find.text('1RM'), findsOneWidget); // 見出し
+      expect(find.text('100.0 kg'), findsOneWidget); // バッジ（結合）
+    });
 
-    expect(find.text('1RM'), findsOneWidget); // 見出し
-    expect(find.text('100.0 kg'), findsOneWidget); // バッジ（結合）
-  });
+    testWidgets('6. 記録のない種目は「-- kg」バッジが表示される', (tester) async {
+      await pumpScreen(
+        tester,
+        state: ExerciseMasterState(
+          exercises: [makeExercise(id: 1, name: 'ベンチプレス')],
+        ),
+        oneRmMap: const {},
+      );
+      await tester.pump();
 
-  testWidgets('6. 記録のない種目は「-- kg」バッジが表示される', (tester) async {
-    await pumpScreen(
-      tester,
-      state: ExerciseMasterState(
-        exercises: [makeExercise(id: 1, name: 'ベンチプレス')],
-      ),
-      oneRmMap: const {},
-    );
-    await tester.pump();
-
-    expect(find.text('1RM'), findsOneWidget); // 見出し
-    expect(find.text('-- kg'), findsOneWidget); // バッジ
+      expect(find.text('1RM'), findsOneWidget); // 見出し
+      expect(find.text('-- kg'), findsOneWidget); // バッジ
+    });
   });
 }
 
