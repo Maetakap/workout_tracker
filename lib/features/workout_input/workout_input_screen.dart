@@ -12,11 +12,14 @@ class WorkoutInputScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(workoutInputProvider);
     final notifier = ref.read(workoutInputProvider.notifier);
-    final exercises = ref.watch(exerciseMasterProvider).exercises;
+    final exerciseState = ref.watch(exerciseMasterProvider);
+    final exercises = exerciseState.exercises;
 
     return Scaffold(
       appBar: AppBar(title: const Text('トレーニング記録')),
-      body: exercises.isEmpty
+      body: exerciseState.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : exercises.isEmpty
           ? const _NoExercisePrompt()
           : ListView(
               padding: const EdgeInsets.all(16),

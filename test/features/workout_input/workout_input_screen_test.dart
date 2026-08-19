@@ -24,7 +24,8 @@ void main() {
   Future<void> pumpInputScreen(
     WidgetTester tester, {
     required WorkoutInputState inputState,
-    required List<ExerciseMaster> exercises,
+    List<ExerciseMaster> exercises = const [],
+    bool isLoading = false,
   }) async {
     useTallTestViewport(tester);
 
@@ -46,7 +47,7 @@ void main() {
         ),
         exerciseMasterProvider.overrideWith(
           () => _FakeExerciseMasterNotifier(
-            ExerciseMasterState(exercises: exercises),
+            ExerciseMasterState(exercises: exercises, isLoading: isLoading),
           ),
         ),
       ],
@@ -141,6 +142,16 @@ void main() {
         tester,
         inputState: state,
         exercises: [makeExercise(id: 1, name: 'ベンチプレス')],
+      );
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    });
+
+    testWidgets('7. 種目データ読み込み中はローディングインジケーターが表示される', (tester) async {
+      await pumpInputScreen(
+        tester,
+        inputState: WorkoutInputState(),
+        isLoading: true, // 💡 isLoading: true を渡す修正
       );
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
