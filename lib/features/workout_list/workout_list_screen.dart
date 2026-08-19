@@ -92,7 +92,7 @@ class WorkoutListScreen extends ConsumerWidget {
                               children: exerciseSummaries.map((entry) {
                                 final (name, volume) = entry;
                                 return Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
+                                  padding: const EdgeInsets.only(bottom: 10),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
