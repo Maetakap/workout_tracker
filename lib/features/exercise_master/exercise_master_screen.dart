@@ -7,7 +7,7 @@ import '../shared/one_rm_provider.dart';
 import 'exercise_master_notifier.dart';
 
 // 💡 レイアウト共通の定数
-const double _weightKgWidth = 80.0; // 1RMバッジの幅
+const double _weightKgWidth = 100.0; // 1RMバッジの幅
 
 class ExerciseMasterScreen extends ConsumerWidget {
   const ExerciseMasterScreen({super.key});
@@ -53,54 +53,65 @@ class ExerciseMasterScreen extends ConsumerWidget {
                         notifier.reorder(oldIndex, newIndex),
                     itemBuilder: (context, index) {
                       final exercise = state.exercises[index];
-                      return SwipeableListItem(
-                        key: ValueKey(exercise.exerciseId),
-                        onDeleteConfirm: () => showConfirmDialog(
-                          context,
-                          title: '種目を削除',
-                          content: 'この種目を削除しますか？\n記録済みのデータには影響しません。',
-                        ),
-                        onEdit: () => _showEditDialog(
-                          context,
-                          ref,
-                          exercise.exerciseId,
-                          exercise.name,
-                        ),
-                        onDeleted: () async {
-                          await ref
-                              .read(exerciseMasterProvider.notifier)
-                              .deleteExercise(exercise.exerciseId);
-                        },
-                        child: Padding(
-                          key: ValueKey(exercise.exerciseId),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              // ドラッグハンドル
-                              ReorderableDragStartListener(
-                                index: index,
-                                child: const Icon(
-                                  Icons.drag_handle,
-                                  color: Colors.grey,
-                                ),
+                      final itemKey = ValueKey(exercise.exerciseId);
+                      return Column(
+                        key: itemKey, // ReorderableListView 用の Key
+                        children: [
+                          SwipeableListItem(
+                            key: itemKey,
+                            onDeleteConfirm: () => showConfirmDialog(
+                              context,
+                              title: '種目を削除',
+                              content: 'この種目を削除しますか？\n記録済みのデータには影響しません。',
+                            ),
+                            onEdit: () => _showEditDialog(
+                              context,
+                              ref,
+                              exercise.exerciseId,
+                              exercise.name,
+                            ),
+                            onDeleted: () async {
+                              await ref
+                                  .read(exerciseMasterProvider.notifier)
+                                  .deleteExercise(exercise.exerciseId);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
                               ),
-                              const SizedBox(width: 12),
-                              // 種目名
-                              Expanded(
-                                child: Text(
-                                  exercise.name,
-                                  style: Theme.of(context).textTheme.bodyLarge,
-                                ),
+                              child: Row(
+                                children: [
+                                  // ドラッグハンドル
+                                  ReorderableDragStartListener(
+                                    index: index,
+                                    child: const Icon(
+                                      Icons.drag_handle,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  // 種目名
+                                  Expanded(
+                                    child: Text(
+                                      exercise.name,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // 1RMバッジ
+                                  _OneRmBadge(
+                                    value: oneRmMap[exercise.exerciseId],
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 8),
-                              // 1RMバッジ
-                              _OneRmBadge(value: oneRmMap[exercise.exerciseId]),
-                            ],
+                            ),
                           ),
-                        ),
+                          // 行間の横線
+                          const Divider(height: 1),
+                        ],
                       );
                     },
                   ),
@@ -185,8 +196,6 @@ class ExerciseMasterScreen extends ConsumerWidget {
   }
 }
 
-/// 1RM表示バッジ（xx kg を角丸の箱で表示・固定幅・中央寄せ）
-/// 1RM表示バッジ（詳細画面の_Badgeを踏襲・固定幅80）
 class _OneRmBadge extends StatelessWidget {
   const _OneRmBadge({required this.value});
 
@@ -205,6 +214,7 @@ class _OneRmBadge extends StatelessWidget {
         '${formatOneRmValue(value)} kg',
         style: Theme.of(context).textTheme.bodyMedium,
         textAlign: TextAlign.center,
+        softWrap: false, // バッジ内の改行を防止
       ),
     );
   }
