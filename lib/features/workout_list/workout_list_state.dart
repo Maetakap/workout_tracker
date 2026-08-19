@@ -1,4 +1,5 @@
 import '../../data/database/app_database.dart';
+import '../shared/workout_math.dart';
 
 class WorkoutListState {
   final List<WorkoutSession> sessions;
@@ -17,27 +18,32 @@ class WorkoutListState {
     this.isLoading = false,
   });
 
-  /// セッションに紐づく種目名一覧を返す（表示用）
-  List<String> exerciseNamesForSession(int sessionId) {
-    final exerciseIds = sets
-        .where((s) => s.sessionId == sessionId)
-        .map((s) => s.exerciseId)
-        .toSet();
-    return exerciseIds
-        .map(
-          (id) => exercises
-              .firstWhere(
-                (e) => e.exerciseId == id,
-                orElse: () => ExerciseMaster(
-                  exerciseId: -1,
-                  name: '(削除済み種目)',
-                  sortOrder: -1,
-                  createdAt: DateTime(0),
-                ),
-              )
-              .name,
-        )
-        .toList();
+  /// セッションに紐づく種目ごとの（種目名, 合計ボリューム）一覧を返す（表示用）
+  List<(String, double)> exerciseSummariesForSession(int sessionId) {
+    final sessionSets = sets.where((s) => s.sessionId == sessionId);
+    final exerciseIds = sessionSets.map((s) => s.exerciseId).toSet();
+
+    return exerciseIds.map((id) {
+      final name = exercises
+          .firstWhere(
+            (e) => e.exerciseId == id,
+            orElse: () => ExerciseMaster(
+              exerciseId: -1,
+              name: '(削除済み種目)',
+              sortOrder: -1,
+              createdAt: DateTime(0),
+            ),
+          )
+          .name;
+
+      final volume = sumVolume(
+        sessionSets
+            .where((s) => s.exerciseId == id)
+            .map((s) => (s.weightKg, s.reps)),
+      );
+
+      return (name, volume);
+    }).toList();
   }
 
   /// フィルター適用済みセッション一覧

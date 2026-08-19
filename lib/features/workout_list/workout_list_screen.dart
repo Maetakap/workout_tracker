@@ -5,6 +5,7 @@ import '../../data/providers.dart';
 import '../shared/confirm_dialog.dart';
 import '../shared/one_rm_provider.dart';
 import '../shared/swipeable_list_item.dart';
+import '../shared/workout_math.dart';
 import 'workout_list_notifier.dart';
 
 class WorkoutListScreen extends ConsumerWidget {
@@ -54,9 +55,8 @@ class WorkoutListScreen extends ConsumerWidget {
                     separatorBuilder: (_, _) => const Divider(height: 1),
                     itemBuilder: (context, index) {
                       final session = sessions[index];
-                      final exerciseNames = state.exerciseNamesForSession(
-                        session.sessionId,
-                      );
+                      final exerciseSummaries = state
+                          .exerciseSummariesForSession(session.sessionId);
                       return SwipeableListItem(
                         key: ValueKey(session.sessionId),
                         onDeleteConfirm: () => showConfirmDialog(
@@ -78,14 +78,50 @@ class WorkoutListScreen extends ConsumerWidget {
                           ref.invalidate(exerciseOneRmProvider);
                         },
                         child: ListTile(
-                          title: Text(_formatDate(session.date)),
-                          subtitle: Text(
-                            exerciseNames.join('・'),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(_formatDate(session.date)),
+                              _StarDisplay(focusLevel: session.focusLevel),
+                            ],
                           ),
-                          trailing: _StarDisplay(
-                            focusLevel: session.focusLevel,
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: exerciseSummaries.map((entry) {
+                                final (name, volume) = entry;
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 4),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          name,
+                                          textAlign: TextAlign.right,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                      const Text('：'), // コロンは省略せず固定表示
+                                      const SizedBox(width: 8),
+                                      SizedBox(
+                                        width: 110,
+                                        child: Text(
+                                          formatVolume(volume),
+                                          textAlign: TextAlign.right,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          softWrap: false,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
                           ),
                           onTap: () =>
                               context.push('/list/detail/${session.sessionId}'),
