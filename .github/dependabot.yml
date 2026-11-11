@@ -1,6 +1,4 @@
-# .github/dependabot.yml
-# SHA固定したActionsを、更新のたびにPR（SHA＋バージョンコメント付き）で通知する。
-# 固定により「勝手に新しい版に変わらない」代わりに「更新を取り逃す」リスクが出るため、その穴埋め。
+# SHA固定したActionsの更新を、SHA＋バージョンコメント付きのPRで通知する
 version: 2
 updates:
   - package-ecosystem: github-actions
