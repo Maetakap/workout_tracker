@@ -2,17 +2,45 @@ name: Supabase Keepalive
 
 on:
   schedule:
-    - cron: "0 0 * * 0,3" # 毎週日曜・水曜 UTC 0時（週2回）
+    - cron: '0 0 * * 0,3' # 日・水 UTC 0:00
   workflow_dispatch:
+
+permissions: {}
 
 jobs:
   ping:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Ping Supabase to prevent auto-pause
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: |
-          curl -i -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/keepalive_pings?id=eq.1" \
-            -H "apikey: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}" \
+          set -euo pipefail
+
+          resp_file="$(mktemp)"
+
+          http_code="$(curl -sS --retry 3 --max-time 30 \
+            -o "${resp_file}" -w '%{http_code}' \
+            -X PATCH "${SUPABASE_URL}/rest/v1/keepalive_pings?id=eq.1" \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
             -H "Content-Type: application/json" \
             -H "Prefer: return=representation" \
-            -d "{\"pingedAt\": \"$(date -u +%Y-%m-%dT%H:%M:%S)Z\"}"
+            -d "{\"pingedAt\": \"$(date -u +%Y-%m-%dT%H:%M:%S)Z\"}")"
+
+          # 失敗原因の調査用に、判定前に本文を出力する
+          echo "HTTP ${http_code}"
+          cat "${resp_file}"
+          echo
+
+          case "${http_code}" in
+            2??) ;;
+            *) echo "::error::keepalive request failed (HTTP ${http_code})"; exit 1 ;;
+          esac
+
+          # RLS等で0件更新でもHTTP 2xxになるため、更新行数で判定する
+          if ! jq -e 'type == "array" and length == 1' "${resp_file}" >/dev/null; then
+            echo "::error::keepalive_pings was not updated exactly once. Check RLS policies / row id=1."
+            exit 1
+          fi

@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy Flutter Web to GitHub Pages
 
 on:
   push:
@@ -7,51 +7,75 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
-          flutter-version: "3.47.x" # ★手元の `flutter --version` で出たメジャー・マイナーバージョンを指定（例: '3.29.x' や '3.27.x'）
-          channel: stable
+          persist-credentials: false
 
-      - name: Get dependencies
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: stable
+          flutter-version: '3.47.x' # ローカルの flutter --version と揃える
+
+      - name: Install dependencies
         run: flutter pub get
 
-      - name: Build runner
-        run: dart run build_runner build
+      - name: Generate code
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Run tests
         run: flutter test
 
+      # --dart-define の値は公開JSに埋め込まれるため、公開前提の値のみ渡す
       - name: Build web
-        run: flutter build web --release --base-href /workout_tracker/ --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          flutter build web --release \
+            --base-href /workout_tracker/ \
+            --dart-define=SUPABASE_URL="$SUPABASE_URL" \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
 
-      - name: Create 404.html for SPA routing
+      # GOCSPX-（Google OAuth）と sb_secret_（Supabase）を検知。旧形式の service_role JWT は検知不可
+      - name: Guard against leaked secrets in bundle
+        run: |
+          if grep -rEq 'GOCSPX-[A-Za-z0-9_-]+|sb_secret_[A-Za-z0-9_-]+' build/web; then
+            echo "::error::Secret-like value found in build output. Aborting deploy."
+            exit 1
+          fi
+
+      # path URL戦略でのリロード404対策
+      - name: Create 404.html
         run: cp build/web/index.html build/web/404.html
 
-      - name: Upload pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: build/web
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
         id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
