@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/jst.dart';
 import '../../database/app_database.dart';
 import '../interface/workout_set_repository.dart';
 
@@ -16,7 +17,7 @@ class SupabaseWorkoutSetRepository implements WorkoutSetRepository {
       weightKg: (m['weightKg'] as num).toDouble(),
       reps: m['reps'] as int,
       rir: m['rir'] as int,
-      createdAt: DateTime.parse(m['createdAt'] as String),
+      createdAt: parseServerTimestamp(m['createdAt'] as String),
     );
   }
 
