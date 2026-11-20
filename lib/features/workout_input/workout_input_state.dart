@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../core/jst.dart';
 import '../shared/workout_math.dart';
 
 class SetRowState {
@@ -42,11 +43,6 @@ class ExerciseCardState {
       sumVolume(sets.map((s) => (s.weightKg ?? 0, s.reps ?? 0)));
 }
 
-DateTime _today() {
-  final now = DateTime.now();
-  return DateTime(now.year, now.month, now.day);
-}
-
 class WorkoutInputState {
   final List<ExerciseCardState> exerciseCards;
   final int? focusLevel;
@@ -61,7 +57,7 @@ class WorkoutInputState {
     DateTime? date,
     this.isSaving = false,
   }) : exerciseCards = exerciseCards ?? [ExerciseCardState()],
-       date = date ?? _today();
+       date = date ?? todayJst();
 
   bool canSave() {
     if (focusLevel == null) return false;

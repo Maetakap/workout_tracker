@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:workout_tracker/core/jst.dart';
 import 'package:workout_tracker/features/workout_input/workout_input_state.dart';
 
 void main() {
@@ -140,11 +141,9 @@ void main() {
     });
   });
   group('WorkoutInputState date', () {
-    test('デフォルトは今日の日付（時刻00:00）', () {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
+    test('デフォルトはJSTの今日の日付（時刻00:00）', () {
       final state = WorkoutInputState();
-      expect(state.date, today);
+      expect(state.date, todayJst());
     });
 
     test('copyWith()でdateのみ変更し他は保持', () {

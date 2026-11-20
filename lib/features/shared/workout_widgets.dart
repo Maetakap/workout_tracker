@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:workout_tracker/features/shared/workout_math.dart';
+import '../../core/jst.dart';
 import '../../data/database/app_database.dart';
 import '../workout_input/workout_input_state.dart';
 import 'date_format.dart';
@@ -453,7 +454,7 @@ class DateField extends StatelessWidget {
       context: context,
       initialDate: value,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      lastDate: todayJst(),
     );
     if (picked != null) onChanged(picked);
   }

@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/jst.dart';
 import '../../database/app_database.dart';
 import '../interface/exercise_master_repository.dart';
 
@@ -13,7 +14,7 @@ class SupabaseExerciseMasterRepository implements ExerciseMasterRepository {
       exerciseId: map['exerciseId'] as int,
       name: map['name'] as String,
       sortOrder: map['sortOrder'] as int,
-      createdAt: DateTime.parse(map['createdAt'] as String),
+      createdAt: parseServerTimestamp(map['createdAt'] as String),
     );
   }
 
@@ -34,7 +35,7 @@ class SupabaseExerciseMasterRepository implements ExerciseMasterRepository {
         .insert({
           'name': name,
           'sortOrder': sortOrder,
-          'createdAt': DateTime.now().toIso8601String(),
+          'createdAt': serverTimestampNow(),
         })
         .select('exerciseId')
         .single();

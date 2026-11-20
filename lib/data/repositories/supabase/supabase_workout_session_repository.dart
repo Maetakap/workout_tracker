@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/jst.dart';
 import '../../database/app_database.dart';
 import '../interface/set_input.dart';
 import '../interface/workout_session_repository.dart';
@@ -11,10 +12,10 @@ class SupabaseWorkoutSessionRepository implements WorkoutSessionRepository {
   WorkoutSession _fromMap(Map<String, dynamic> m) {
     return WorkoutSession(
       sessionId: m['sessionId'] as int,
-      date: DateTime.parse(m['date'] as String),
+      date: parseServerDate(m['date'] as String),
       focusLevel: m['focusLevel'] as int,
       memo: m['memo'] as String?,
-      createdAt: DateTime.parse(m['createdAt'] as String),
+      createdAt: parseServerTimestamp(m['createdAt'] as String),
     );
   }
 
@@ -46,10 +47,10 @@ class SupabaseWorkoutSessionRepository implements WorkoutSessionRepository {
     final row = await _client
         .from('workout_sessions')
         .insert({
-          'date': date.toIso8601String(),
+          'date': toServerDate(date),
           'focusLevel': focusLevel,
           'memo': memo,
-          'createdAt': DateTime.now().toIso8601String(),
+          'createdAt': serverTimestampNow(),
         })
         .select('sessionId')
         .single();
@@ -66,7 +67,7 @@ class SupabaseWorkoutSessionRepository implements WorkoutSessionRepository {
     await _client
         .from('workout_sessions')
         .update({
-          'date': date.toIso8601String(),
+          'date': toServerDate(date),
           'focusLevel': focusLevel,
           'memo': memo,
         })
@@ -88,7 +89,7 @@ class SupabaseWorkoutSessionRepository implements WorkoutSessionRepository {
     final sessionId = await _client.rpc(
       'create_session_with_sets',
       params: {
-        'p_date': date.toIso8601String(),
+        'p_date': toServerDate(date),
         'p_focus_level': focusLevel,
         'p_memo': memo,
         'p_sets': sets.map((s) => s.toJson()).toList(),
@@ -109,7 +110,7 @@ class SupabaseWorkoutSessionRepository implements WorkoutSessionRepository {
       'update_session_with_sets',
       params: {
         'p_session_id': sessionId,
-        'p_date': date.toIso8601String(),
+        'p_date': toServerDate(date),
         'p_focus_level': focusLevel,
         'p_memo': memo,
         'p_sets': sets.map((s) => s.toJson()).toList(),
